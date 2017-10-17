@@ -57,7 +57,6 @@ class PILAE(object):
 
                 hidden_weight.append(V.dot(S))
 
-
                 if numbatch ==0:
                     H = delta_X.dot(self.InputWeight[i])
                     delta_H = ActivationFunc(H, self.actFun[i], self.para[i])
@@ -97,7 +96,6 @@ class PILAE(object):
             feature = feature.dot(self.w[i].T)
             feature = ActivationFunc(feature, self.actFun[i], self.para[i])
         return feature
-
 
 
 def  ActivationFunc(tempH, ActivationFunction, p):

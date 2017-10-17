@@ -1,16 +1,7 @@
 import numpy as np
 import time
 
-def load_MNISTData(path='../data/mnist.npz'):
-    f = np.load(path)
-    x_train = f['x_train']
-    y_train = f['y_train']
-    x_test = f['x_test']
-    y_test = f['y_test']
-    f.close()
-    return (x_train, y_train), (x_test, y_test)
-
-class PILAE(object):
+class col_PILAE(object):
     def __init__(self, lamda=0.05, beta=0.9, activeFunc='sig'):
         self.lamda = lamda
         self.beta = beta
@@ -92,16 +83,3 @@ class PILAE(object):
         print("Accuracy of train data set: %f" %accuracy_score(train_predict, train_y))
         test_predict = reg.predict(test_feature)
         print("Accuracy of train data set: %f" % accuracy_score(test_predict, test_y))
-
-if __name__ == '__main__':
-    (X_train, y_train), (X_test, y_test) = load_MNISTData("../data/mnist.npz")
-    X_train = X_train.reshape(-1, 784).astype('float32')
-    X_train /= 255
-    X_train = X_train.T
-    X_test = X_test.reshape(-1, 784).astype('float32')
-    X_test /= 255
-    X_test = X_test.T
-
-    pilae =  PILAE()
-    pilae.fit(X_train, layer=2)
-    pilae.predict(X_train, y_train, X_test, y_test)
