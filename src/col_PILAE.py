@@ -51,7 +51,7 @@ class col_PILAE(object):
     def fit(self, train_X, layer):
         t1 = time.time()
         X = train_X
-        for i in range(layer):
+        for i in range(layer - 1):
             w = self.autoEncoder(X, i)
             self.weight.append(w)
             H = self.f(w.dot(X), self.acFunc)

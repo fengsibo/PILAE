@@ -3,10 +3,10 @@ import math
 import time
 from sklearn import preprocessing
 
-
 class row_PILAE(object):
-    def __init__(self, k=0.05, beta=0.9, activeFunc='tanh'):
+    def __init__(self, k=0.5, alpha = 0.2, beta=0.9, activeFunc='tanh'):
         self.k = k
+        self.alpha = 0.2
         self.beta = beta
         self.acFunc = activeFunc
         self.weight = []
@@ -39,7 +39,11 @@ class row_PILAE(object):
         V = V.T
         U = U.T
         S[S != 0] = 1 / S[S != 0]
-        p = self.beta*dim_x
+        if rank_x < dim_x :
+            p = dim_x - self.alpha*(dim_x-rank_x);
+        else:
+            p = self.beta*dim_x
+        # p = self.beta*dim_x
         print("the ", layer, " layer, cut p:", p)
         U = U[:, 0:int(p)]
         print("the ", layer, " layer pseduinverse matricx shape:", "U:", U.shape, "S:", S.shape, "V:", V.shape) #(705, 784) (784, 784) (784, 784)
