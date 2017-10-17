@@ -2,9 +2,11 @@ import numpy as np
 import math
 import time
 from sklearn import preprocessing
+import src.tools as tools
+
 
 class row_PILAE(object):
-    def __init__(self, k=0.5, alpha = 0.2, beta=0.9, activeFunc='tanh'):
+    def __init__(self, k=0.5, alpha = 0.8, beta=0.9, activeFunc='tanh'):
         self.k = k
         self.alpha = 0.2
         self.beta = beta
@@ -40,7 +42,7 @@ class row_PILAE(object):
         U = U.T
         S[S != 0] = 1 / S[S != 0]
         if rank_x < dim_x :
-            p = dim_x - self.alpha*(dim_x-rank_x);
+            p = rank_x + self.alpha*(dim_x-rank_x)
         else:
             p = self.beta*dim_x
         # p = self.beta*dim_x
@@ -63,6 +65,7 @@ class row_PILAE(object):
             w = self.autoEncoder(X, i)
             self.weight.append(w)
             H = self.activeFunction(X.dot(w), self.acFunc)
+            H = H/(H.max() - H.min())
             O = H.dot(w.T)
             square = np.linalg.norm(X - O)
             meanSquareError = square**2/X.size
@@ -82,16 +85,23 @@ class row_PILAE(object):
             e = feature
         return feature
 
-    def predict(self, train_X, train_y, test_X, test_y):
+    def predict_softmax(self, train_X, train_y, test_X, test_y):
         from sklearn.linear_model import LogisticRegression
         from sklearn.metrics import accuracy_score
         train_feature = self.extractFeature(train_X)
         test_feature = self.extractFeature(test_X)
+        # tools.save_pickle(train_feature, "../data/one_train_feature.plk")
+        # tools.save_pickle(test_feature, "../data/one_test_feature.plk")
         reg = LogisticRegression(solver="lbfgs", multi_class="multinomial")
         reg.fit(train_feature, train_y)
         train_predict = reg.predict(train_feature)
         print("Accuracy of train data set: %f" %accuracy_score(train_predict, train_y))
         test_predict = reg.predict(test_feature)
         print("Accuracy of train data set: %f" % accuracy_score(test_predict, test_y))
+
+    def predict_svm(self, train_X, train_y, test_X, test_y):
+        from sklearn import svm
+        clf = svm.SVC(kernel='linear')
+        clf.fit()
 
 
