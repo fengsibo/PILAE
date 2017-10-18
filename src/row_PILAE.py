@@ -93,7 +93,7 @@ class row_PILAE(object):
         test_feature = self.extractFeature(test_X)
         # tools.save_pickle(train_feature, "../data/one_train_feature.plk")
         # tools.save_pickle(test_feature, "../data/one_test_feature.plk")
-        reg = LogisticRegression(solver="lbfgs", multi_class="multinomial",max_iter=50)
+        reg = LogisticRegression(solver="lbfgs", multi_class="multinomial",max_iter=150)
         reg.fit(train_feature, train_y)
         train_predict = reg.predict(train_feature)
         print("Accuracy of train data set: %f" %accuracy_score(train_predict, train_y))
