@@ -13,7 +13,7 @@ def load_pickle(picklepath):
     file.close()
     return data
 
-def load_MNISTData(path='../dataset/mnist.npz'):
+def load_MNISTData(path='../dataset/MNIST/mnist.npz'):
     f = np.load(path)
     x_train = f['x_train']
     y_train = f['y_train']
@@ -22,7 +22,7 @@ def load_MNISTData(path='../dataset/mnist.npz'):
     f.close()
     return (x_train, y_train), (x_test, y_test)
 
-def load_mnist(path, kind='train'):
+def load_fashionMNIST(path="../dataset/fashionMNIST", kind='train'):
     import os
     import gzip
     import numpy as np

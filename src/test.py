@@ -27,6 +27,6 @@ X_test /= 255
 # X_train = preprocessing.scale(X_train, axis=1)
 # X_test = preprocessing.scale(X_test, axis=1)
 
-pilae = rp.row_PILAE(k=1, alpha=0.8, beta=0.9)
+pilae = rp.row_PILAE(k=1, alpha=0.8, beta=0.7)
 pilae.fit(X_train, layer=1)
 pilae.predict_softmax(X_train, y_train, X_test, y_test)

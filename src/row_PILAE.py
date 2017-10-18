@@ -35,18 +35,19 @@ class row_PILAE(object):
         print("the ", layer, " layer SVD matricx shape:", "U:", U.shape, "s:", s.shape, "V:", V.shape)  #(784, 784) (784,) (784, 60000)
         dim_x = input_X.shape[1]
         rank_x = np.sum(s > 1e-3)
-        print("the", layer, "layer, dim_x:", dim_x, " rank_x:", rank_x)
+        print("the", layer, " layer, dim_x:", dim_x, " rank_x:", rank_x)
         S = np.zeros((U.shape[1], V.shape[0]))
         S[:s.shape[0], :s.shape[0]] = np.diag(s)
         V = V.T
         U = U.T
         S[S != 0] = 1 / S[S != 0]
         if rank_x < dim_x :
-            p = rank_x + self.alpha*(dim_x-rank_x)
+            # p = rank_x + self.alpha*(dim_x-rank_x)
+            p = self.beta*dim_x
         else:
             p = self.beta*dim_x
         # p = self.beta*dim_x
-        print("the ", layer, " layer, cut p:", p)
+        print("the ", layer, " layer, cut p:", int(p))
         U = U[:, 0:int(p)]
         print("the ", layer, " layer pseduinverse matricx shape:", "U:", U.shape, "S:", S.shape, "V:", V.shape) #(705, 784) (784, 784) (784, 784)
         W_e = V.dot(S).dot(U)
@@ -92,7 +93,7 @@ class row_PILAE(object):
         test_feature = self.extractFeature(test_X)
         # tools.save_pickle(train_feature, "../data/one_train_feature.plk")
         # tools.save_pickle(test_feature, "../data/one_test_feature.plk")
-        reg = LogisticRegression(solver="lbfgs", multi_class="multinomial")
+        reg = LogisticRegression(solver="lbfgs", multi_class="multinomial",max_iter=50)
         reg.fit(train_feature, train_y)
         train_predict = reg.predict(train_feature)
         print("Accuracy of train data set: %f" %accuracy_score(train_predict, train_y))
