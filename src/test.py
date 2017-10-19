@@ -1,3 +1,5 @@
+import sys
+sys.path.append("../src")
 import src.row_PILAE as rp
 import src.tools as tools
 import src.Hog as hg
@@ -9,27 +11,29 @@ import multiprocessing
 
 (X_train, y_train), (X_test, y_test) = tools.load_MNISTData()
 
-def fun(array, type):
-    t1 = time.time()
-    hg.extract_featuer(array, type)
-    t2 = time.time()
-    print(type, t2 - t1)
-
-if __name__ == "__main__":
-    pool = multiprocessing.Pool(processes=2)
-    pool.apply_async(fun, (X_train, ))
-    pool.apply_async(fun, (X_test, ))
-    pool.close()
-    pool.join()
-
-# t = time.time()
-# hg.extract_featuer(X_train)
-# t2 = time.time()
-# print(t2 - t)
-
-# X_train = X_train.reshape(-1, 784).astype('float32')
-# X_test = X_test.reshape(-1, 784).astype('float32')
+# def fun(array, type, num):
+#     t1 = time.time()
+#     hg.extract_featuer(array, type, num)
+#     t2 = time.time()
+#     print(type, t2 - t1)
 #
+# if __name__ == '__main__':
+#     i = 0
+#     while i < 9:
+#         fun(X_train, "train", i + 1)
+#         fun(X_test, "test", i + 1)
+#         i+=1
+
+X_train = X_train.reshape(-1, 784).astype('float32')
+X_test = X_test.reshape(-1, 784).astype('float32')
+
+X_train = tools.load_pickle("../data/mnist_hog_feature_train_5.plk")
+X_test = tools.load_pickle("../data/mnist_hog_feature_test_5.plk")
+X_train = X_train.T[:60000, :]*100
+X_test = X_test.T[:10000, :]*100
+# minmax_scaler = preprocessing.MinMaxScaler()
+# X_train = minmax_scaler.fit_transform(X_train)
+# X_test = minmax_scaler.fit_transform(X_test)
 # X_train /= 255
 # X_test /= 255
 
@@ -48,6 +52,9 @@ if __name__ == "__main__":
 # X_train = preprocessing.scale(X_train, axis=1)
 # X_test = preprocessing.scale(X_test, axis=1)
 
-# pilae = rp.row_PILAE(k=1, alpha=0.8, beta=0.7)
-# pilae.fit(X_train, layer=1)
-# pilae.predict_softmax(X_train, y_train, X_test, y_test)
+t1 = time.time()
+pilae = rp.row_PILAE(k=2.5, alpha=0.8, beta=0.8)
+pilae.fit(X_train, layer=1)
+pilae.predict(X_train, y_train, X_test, y_test)
+t2 = time.time()
+print("Total cost time: %.4f" %(t2 - t1))

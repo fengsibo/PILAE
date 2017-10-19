@@ -86,23 +86,35 @@ class row_PILAE(object):
             e = feature
         return feature
 
-    def predict_softmax(self, train_X, train_y, test_X, test_y):
-        from sklearn.linear_model import LogisticRegression
+    def predict(self, train_X, train_y, test_X, test_y):
         from sklearn.metrics import accuracy_score
         train_feature = self.extractFeature(train_X)
         test_feature = self.extractFeature(test_X)
         # tools.save_pickle(train_feature, "../data/one_train_feature.plk")
         # tools.save_pickle(test_feature, "../data/one_test_feature.plk")
-        reg = LogisticRegression(solver="lbfgs", multi_class="multinomial",max_iter=150)
-        reg.fit(train_feature, train_y)
-        train_predict = reg.predict(train_feature)
-        print("Accuracy of train data set: %f" %accuracy_score(train_predict, train_y))
-        test_predict = reg.predict(test_feature)
-        print("Accuracy of train data set: %f" % accuracy_score(test_predict, test_y))
+        model = self.regression_classifier(train_feature, train_y)
+        train_predict = model.predict(train_feature)
+        print("Accuracy of train data set: %.4f" %accuracy_score(train_predict, train_y))
+        test_predict = model.predict(test_feature)
+        print("Accuracy of test data set: %.4f" % accuracy_score(test_predict, test_y))
 
-    def predict_svm(self, train_X, train_y, test_X, test_y):
+    def regression_classifier(self, train_X, train_y):
+        from sklearn.linear_model import LogisticRegression
+        model = LogisticRegression(solver="lbfgs", multi_class="multinomial", max_iter=150)
+        model.fit(train_X, train_y)
+        return model
+
+    def svm_classifier(self, train_X, train_y):
+        from sklearn.svm import SVC
+        model = SVC(kernel='linear', probability=False)
+        model.fit(train_X, train_y)
+        return model
+
+    def linearsvm_classifier(self, train_X, train_y):
         from sklearn import svm
-        clf = svm.SVC(kernel='linear')
-        clf.fit()
+        model = svm.LinearSVC()
+        model.fit(train_X, train_y)
+        return model
+
 
 

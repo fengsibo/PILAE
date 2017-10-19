@@ -14,25 +14,28 @@ hog_descriptor = [
     {'orientations': 15, 'block': (8, 8), 'cell': (1, 1)},
 ]
 
-def hog_ex(arr):
+def hog_ex(arr, num):
     hog_feature = np.empty(shape=[0, 0])
     len = 0
-    for i in hog_descriptor:
-        h = hog(arr, i["orientations"], i["block"], i["cell"])
+    for i in range(num):
+        h = hog(arr, hog_descriptor[i]["orientations"], hog_descriptor[i]["block"], hog_descriptor[i]["cell"])
         hog_feature = np.append(hog_feature, h)
     # print(len)
     return hog_feature
 
-def extract_featuer(X, type):
+def extract_featuer(X, type, num):
     input_X = X
-    hog = hog_ex(input_X[0])
+    hog = hog_ex(input_X[0], num)
+    hog = hog.reshape((hog.shape[0], 1))
     feature = np.empty(hog.shape)
     i = 0
     for arr in input_X:
-        hog = hog_ex(arr)
+        hog = hog_ex(arr, num)
+        hog = hog.reshape((hog.shape[0], 1))
         print(i)
         i += 1
-        feature = np.append(feature, hog, axis=0)
-    tools.save_pickle(feature, "../data/mnist_hog_feature_"+type+"9.plk")
+        feature = np.append(feature, hog, axis=1)
+        print(feature.shape)
+    tools.save_pickle(feature, "../data/mnist_hog_feature_"+type+"_"+str(num)+".plk")
     print(feature.shape)
 

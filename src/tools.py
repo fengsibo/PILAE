@@ -5,7 +5,7 @@ def save_pickle(file, filesavepath):
     filepath = open(filesavepath, "wb")
     pickle.dump(file, filepath)
     filepath.close()
-    print("save "+filepath+"suc!")
+    print("save "+filesavepath+"suc!")
 
 def load_pickle(picklepath):
     file = open(picklepath, "rb")
