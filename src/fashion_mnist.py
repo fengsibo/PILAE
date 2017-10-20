@@ -18,7 +18,7 @@ X_train, X_test = hg.load_hog(7)
 # X_test = scaler.fit_transform(X_test)
 
 t1 = time.time()
-pilae = rp.row_PILAE(k=2.5, alpha=0.85, beta=0.8, activeFunc='sig')
+pilae = rp.row_PILAE(k=1.5, alpha=0.75, beta=0.8, activeFunc='sig')
 pilae.fit(X_train, layer=1)
 pilae.predict(X_train, y_train, X_test, y_test)
 t2 = time.time()
