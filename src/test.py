@@ -25,17 +25,21 @@ import multiprocessing
 #         i+=1
 
 X_train = X_train.reshape(-1, 784).astype('float32')
+X_train2 = X_train.reshape(-1, 784, order='F').astype('float32')
+X_train = np.concatenate((X_train, X_train2), axis=1)
 X_test = X_test.reshape(-1, 784).astype('float32')
+X_test2 = X_test.reshape(-1, 784, order='F').astype('float32')
+X_test = np.concatenate((X_test, X_test2), axis=1)
 
-X_train = tools.load_pickle("../data/mnist_hog_feature_train_5.plk")
-X_test = tools.load_pickle("../data/mnist_hog_feature_test_5.plk")
-X_train = X_train.T[:60000, :]*100
-X_test = X_test.T[:10000, :]*100
+# X_train = tools.load_pickle("../data/mnist_hog_feature_train_5.plk")
+# X_test = tools.load_pickle("../data/mnist_hog_feature_test_5.plk")
+# X_train = X_train.T[:60000, :]*100
+# X_test = X_test.T[:10000, :]*100
 # minmax_scaler = preprocessing.MinMaxScaler()
 # X_train = minmax_scaler.fit_transform(X_train)
 # X_test = minmax_scaler.fit_transform(X_test)
-# X_train /= 255
-# X_test /= 255
+X_train /= 255
+X_test /= 255
 
 # train_mean = X_train.mean(axis=1)
 # train_mean = train_mean.reshape(60000, 1)
@@ -53,7 +57,7 @@ X_test = X_test.T[:10000, :]*100
 # X_test = preprocessing.scale(X_test, axis=1)
 
 t1 = time.time()
-pilae = rp.row_PILAE(k=2.5, alpha=0.8, beta=0.8)
+pilae = rp.row_PILAE(k=2.8, alpha=0.9, beta=0.9)
 pilae.fit(X_train, layer=1)
 pilae.predict(X_train, y_train, X_test, y_test)
 t2 = time.time()
