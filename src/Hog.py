@@ -1,6 +1,7 @@
 import src.tools as tools
 from skimage.feature import hog
 import numpy as np
+import time
 
 hog_descriptor = [
     {'orientations': 9, 'block': (8, 8), 'cell': (3, 3)},
@@ -14,28 +15,53 @@ hog_descriptor = [
     {'orientations': 15, 'block': (8, 8), 'cell': (1, 1)},
 ]
 
-def hog_ex(arr, num):
-    hog_feature = np.empty(shape=[0, 0])
-    len = 0
-    for i in range(num):
-        h = hog(arr, hog_descriptor[i]["orientations"], hog_descriptor[i]["block"], hog_descriptor[i]["cell"])
-        hog_feature = np.append(hog_feature, h)
-    # print(len)
-    return hog_feature
-
-def extract_featuer(X, type, num):
+def extract_hog_featuer(X, type, num):
     input_X = X
-    hog = hog_ex(input_X[0], num)
-    hog = hog.reshape((hog.shape[0], 1))
-    feature = np.empty(hog.shape)
+    from skimage.feature import hog
+    hog_f = hog(input_X[0], hog_descriptor[num]["orientations"], hog_descriptor[num]["block"], hog_descriptor[num]["cell"])
+    hog_f = hog_f.reshape((hog_f.shape[0], 1))
+    feature = np.empty(hog_f.shape)
     i = 0
     for arr in input_X:
-        hog = hog_ex(arr, num)
-        hog = hog.reshape((hog.shape[0], 1))
+        hog_f = hog(arr, hog_descriptor[num]["orientations"], hog_descriptor[num]["block"], hog_descriptor[num]["cell"])
+        hog_f = hog_f.reshape((hog_f.shape[0], 1))
         print(i)
         i += 1
-        feature = np.append(feature, hog, axis=1)
+        feature = np.append(feature, hog_f, axis=1)
         print(feature.shape)
-    tools.save_pickle(feature, "../data/mnist_hog_feature_"+type+"_"+str(num)+".plk")
+    feature = feature.T[1:, :]
+    tools.save_pickle(feature, "../data/fashion_mnist/fashion_mnist_hog_feature_"+type+"_"+str(num)+".plk")
     print(feature.shape)
+
+def load_hog(num):
+    for i in range(num):
+        hog_train_plk_path = "../data/fashion_mnist/mnist_hog_feature_train_" + str(i) + ".plk"
+        hog_test_plk_path = "../data/fashion_mnist/mnist_hog_feature_test_" + str(i) + ".plk"
+        if i == 0:
+            X_train = tools.load_pickle(hog_train_plk_path)
+            X_test = tools.load_pickle(hog_test_plk_path)
+        else:
+            m_train = tools.load_pickle(hog_train_plk_path)
+            m_test = tools.load_pickle(hog_test_plk_path)
+            X_train = np.concatenate((X_train, m_train), axis=1)
+            X_test = np.concatenate((X_test, m_test), axis=1)
+    X_train *= 100
+    X_test *= 100
+    return X_train, X_test
+
+if __name__ == "__main__":
+    # (X_train, y_train), (X_test, y_test) = tools.load_MNISTData()
+
+    X_train, y_train = tools.load_fashionMNIST()
+    X_test, y_test = tools.load_fashionMNIST(kind='t10k')
+    X_train = X_train.reshape((60000, 28, 28))
+    X_test = X_test.reshape((10000, 28, 28))
+    print(X_train.shape, X_test.shape)
+
+    #
+    len = hog_descriptor.__len__()
+    for i in range(len):
+        extract_hog_featuer(X_train, "train", i)
+        extract_hog_featuer(X_test, "test", i)
+
 
