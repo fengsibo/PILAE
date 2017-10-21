@@ -44,3 +44,20 @@ def load_fashionMNIST(path="../dataset/fashion_mnist", kind='train'):
                                offset=16).reshape(len(labels), 784)
 
     return images, labels
+
+def load_cifar10(path):
+    import pickle
+    import os
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            filepath = root + file
+            with open(filepath, 'rb') as fo:
+                dict = pickle.load(fo, encoding='bytes')
+                X = dict[b'data']
+                X_train = np.array(X).reshape(-1, 3, 32, 32)
+                y = dict[b'labels']
+                print(len(X[0]))
+                # print(X)
+
+
+# load_cifar10("../dataset/cifar-10/")
