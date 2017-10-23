@@ -50,10 +50,10 @@ def extract_hog_featuer(X, type, num):
     tools.save_pickle(feature, "../data/"+type+"_"+str(num)+".plk")
     print(feature.shape)
 
-def load_hog(num):
+def load_hog(path, num):
     for i in range(num):
-        hog_train_plk_path = "../data/fashion_mnist/mnist_hog_feature_train_" + str(i) + ".plk"
-        hog_test_plk_path = "../data/fashion_mnist/mnist_hog_feature_test_" + str(i) + ".plk"
+        hog_train_plk_path = path+"_hog_feature_train_" + str(i) + ".plk"
+        hog_test_plk_path = path +"_hog_feature_test_"+ str(i) + ".plk"
         if i == 0:
             X_train = tools.load_pickle(hog_train_plk_path)
             X_test = tools.load_pickle(hog_test_plk_path)
@@ -62,8 +62,6 @@ def load_hog(num):
             m_test = tools.load_pickle(hog_test_plk_path)
             X_train = np.concatenate((X_train, m_train), axis=1)
             X_test = np.concatenate((X_test, m_test), axis=1)
-    X_train *= 100
-    X_test *= 100
     return X_train, X_test
 
 if __name__ == "__main__":

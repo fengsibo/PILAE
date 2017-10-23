@@ -8,19 +8,17 @@ import numpy as np
 import time
 import multiprocessing
 import csv
-
-
-(X_train, y_train), (X_test, y_test) = tools.load_MNISTData()
-# X_train = X_train.reshape(-1, 784).astype('float32')
-# X_test = X_test.reshape(-1, 784).astype('float32')
-# X_train /= 255
-# X_test /= 255
+(X_train, y_train), (X_test, y_test) = tools.load_cifar10("../dataset/cifar-10")
+X_train = X_train.astype('float32')
+X_test = X_test.astype('float32')
+X_train /= 255
+X_test /= 255
 
 # for hog data
-num = 15
-X_train, X_test = hg.load_hog("../data/mnist/mnist", num)
-X_train *= 10
-X_test *= 10
+num = 0
+# X_train, X_test = hg.load_hog("../data/cifar-10/cifar10", num)
+# X_train *= 10
+# X_test *= 10
 
 # print(X_train.shape, X_test.shape)
 
@@ -45,7 +43,7 @@ X_test *= 10
 
 t1 = time.time()
 pilae = rp.row_PILAE(k=2, alpha=0.8, beta=0.8, activeFunc='tanh')
-pilae.fit(X_train, layer=1)
+pilae.fit(X_train, layer=2)
 pilae.predict(X_train, y_train, X_test, y_test)
 t2 = time.time()
 cost_time = t2 - t1

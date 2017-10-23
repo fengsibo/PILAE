@@ -42,22 +42,47 @@ def load_fashionMNIST(path="../dataset/fashion_mnist", kind='train'):
     with gzip.open(images_path, 'rb') as imgpath:
         images = np.frombuffer(imgpath.read(), dtype=np.uint8,
                                offset=16).reshape(len(labels), 784)
-
     return images, labels
 
-def load_cifar10(path):
+def load_pickle_cifar10(filepath):
     import pickle
-    import os
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            filepath = root + file
-            with open(filepath, 'rb') as fo:
-                dict = pickle.load(fo, encoding='bytes')
-                X = dict[b'data']
-                X_train = np.array(X).reshape(-1, 3, 32, 32)
-                y = dict[b'labels']
-                print(len(X[0]))
-                # print(X)
+    with open(filepath, 'rb') as fo:
+        dict = pickle.load(fo, encoding='bytes')
+        X = dict[b'data']
+        X_train = np.array(X).reshape(-1, 3, 32, 32)
+        y = dict[b'labels']
+    return np.array(X), np.array(y)
+
+def load_cifar10(cifar10_dir):
+    trainpath = cifar10_dir + '/' + "data_batch_"
+    testpath = cifar10_dir + '/' + "test_batch"
+    X_test, y_test = load_pickle_cifar10(testpath)
+    for i in range(1, 5):
+        if i == 1:
+            X_train, y_train = load_pickle_cifar10(trainpath + str(i))
+        else:
+            X, y = load_pickle_cifar10(trainpath + str(i))
+            X_train = np.concatenate((X_train, X))
+            y_train = np.concatenate((y_train, y))
+    return (X_train, y_train), (X_test, y_test)
 
 
-# load_cifar10("../dataset/cifar-10/")
+def draw_line_chart(csvfile, savename, x_name, y_name_1, y_name_2,):
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    csv = pd.read_csv(csvfile)
+    x = csv[x_name]
+    y1 = csv[y_name_1]
+    y2 = csv[y_name_2]
+    plt.figure()
+    plt.plot(x, y1,  marker='o')
+    plt.plot(x, y2,  marker='^')
+    plt.xlabel('number of maps')
+    plt.ylabel('accuracy')
+    plt.grid()
+    plt.legend()
+    plt.savefig('../eps/'+savename)
+    plt.show()
+
+# path = "../csv_file/fashion_mnist/fashion_mnist_maps.csv"
+# draw_line_chart(path, 'fashion_mnist_maps_acc.eps','maps', 'train_acc', 'test_acc')

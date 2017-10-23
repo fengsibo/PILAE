@@ -8,7 +8,10 @@ from sklearn.preprocessing import StandardScaler
 X_train, y_train = tools.load_fashionMNIST()
 X_test, y_test = tools.load_fashionMNIST(kind='t10k')
 
-X_train, X_test = hg.load_hog(4)
+num = 4
+X_train, X_test = hg.load_hog("../data/fashion_mnist/fashion_mnist", num)
+X_train *= 100
+X_test *= 100
 
 # X_train /= 255
 # X_test /= 255
@@ -27,5 +30,5 @@ print("Total cost time: %.2f" %cost_time)
 # write into .csv file
 with open("../log/mnist_info.csv", 'at+') as csvfile:
     writer = csv.writer(csvfile)
-    # writer.writerow(["layer", "time", "train_acc", "test_acc", "k", "alpha", "beta", "acf"])
-    writer.writerow([pilae.layer, cost_time, pilae.train_acc, pilae.test_acc, pilae.k, pilae.alpha, pilae.beta, pilae.acFunc])
+    writer.writerow(["map", "dimesion", "layer", "time", "train_acc", "test_acc", "k", "alpha", "beta", "acf"])
+    writer.writerow([num, X_train[1], pilae.layer, cost_time, pilae.train_acc, pilae.test_acc, pilae.k, pilae.alpha, pilae.beta, pilae.acFunc])
