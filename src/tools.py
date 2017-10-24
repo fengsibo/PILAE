@@ -5,7 +5,7 @@ def save_pickle(file, filesavepath):
     filepath = open(filesavepath, "wb")
     pickle.dump(file, filepath)
     filepath.close()
-    print("save "+filesavepath+"suc!")
+    print("save "+filesavepath+" suc!")
 
 def load_pickle(picklepath):
     file = open(picklepath, "rb")
@@ -13,7 +13,7 @@ def load_pickle(picklepath):
     file.close()
     return data
 
-def load_MNISTData(path='../dataset/mnist/mnist.npz'):
+def load_npz(path):
     f = np.load(path)
     x_train = f['x_train']
     y_train = f['y_train']
@@ -86,3 +86,4 @@ def draw_line_chart(csvfile, savename, x_name, y_name_1, y_name_2,):
 
 # path = "../csv_file/fashion_mnist/fashion_mnist_maps.csv"
 # draw_line_chart(path, 'fashion_mnist_maps_acc.eps','maps', 'train_acc', 'test_acc')
+

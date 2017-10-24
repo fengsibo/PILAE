@@ -52,8 +52,8 @@ def extract_hog_featuer(X, type, num):
 
 def load_hog(path, num):
     for i in range(num):
-        hog_train_plk_path = path+"_hog_feature_train_" + str(i) + ".plk"
-        hog_test_plk_path = path +"_hog_feature_test_"+ str(i) + ".plk"
+        hog_train_plk_path = path + "_hog_feature_train_" + str(i) + ".plk"
+        hog_test_plk_path = path + "_hog_feature_test_" + str(i) + ".plk"
         if i == 0:
             X_train = tools.load_pickle(hog_train_plk_path)
             X_test = tools.load_pickle(hog_test_plk_path)
@@ -64,17 +64,17 @@ def load_hog(path, num):
             X_test = np.concatenate((X_test, m_test), axis=1)
     return X_train, X_test
 
-if __name__ == "__main__":
-    (X_train, y_train), (X_test, y_test) = tools.load_MNISTData()
-    # hog_f = hog(X_train[0], 24, (12, 12), (2, 2))
-    # print(hog_f.__len__())
-
-    len = hog_descriptor.__len__()
-    i = 0
-    while i < len:
-        extract_hog_featuer(X_train, "mnist/mnist_hog_feature_train", i)
-        extract_hog_featuer(X_test, "mnist/mnist_hog_feature_test", i)
-        i += 1
+# if __name__ == "__main__":
+#     (X_train, y_train), (X_test, y_test) = tools.load_MNISTData()
+#     # hog_f = hog(X_train[0], 24, (12, 12), (2, 2))
+#     # print(hog_f.__len__())
+#
+#     len = hog_descriptor.__len__()
+#     i = 0
+#     while i < len:
+#         extract_hog_featuer(X_train, "mnist/mnist_hog_feature_train", i)
+#         extract_hog_featuer(X_test, "mnist/mnist_hog_feature_test", i)
+#         i += 1
 
     # X_train, y_train = tools.load_fashionMNIST()
     # X_test, y_test = tools.load_fashionMNIST(kind='t10k')
@@ -89,5 +89,6 @@ if __name__ == "__main__":
     #     extract_hog_featuer(X_train, "fashion_mnist/fashion_mnist_hog_feature_train", i)
     #     extract_hog_featuer(X_test, "fashion_mnist/fashion_mnist_hog_feature_test", i)
     #     i += 1
+
 
 

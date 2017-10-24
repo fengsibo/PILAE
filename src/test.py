@@ -10,7 +10,7 @@ import multiprocessing
 import csv
 
 
-(X_train, y_train), (X_test, y_test) = tools.load_MNISTData()
+(X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/mnist/mnist.npz")
 # X_train = X_train.reshape(-1, 784).astype('float32')
 # X_test = X_test.reshape(-1, 784).astype('float32')
 # X_train /= 255
@@ -19,8 +19,8 @@ import csv
 # for hog data
 num = 15
 X_train, X_test = hg.load_hog("../data/mnist/mnist", num)
-X_train *= 10
-X_test *= 10
+X_train *= 100
+X_test *= 100
 
 # print(X_train.shape, X_test.shape)
 

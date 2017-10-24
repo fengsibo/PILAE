@@ -3,10 +3,13 @@ import src.tools as tools
 import src.Hog as hg
 import time
 import csv
+import numpy as np
 from sklearn.preprocessing import StandardScaler
 
-X_train, y_train = tools.load_fashionMNIST()
-X_test, y_test = tools.load_fashionMNIST(kind='t10k')
+# X_train, y_train = tools.load_fashionMNIST()
+# X_test, y_test = tools.load_fashionMNIST(kind='t10k')
+
+(X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/fashion_mnist/fashionmnist.npz")
 
 num = 4
 X_train, X_test = hg.load_hog("../data/fashion_mnist/fashion_mnist", num)
