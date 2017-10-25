@@ -11,10 +11,8 @@ import csv
 
 
 (X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/mnist/mnist.npz")
-# X_train = X_train.reshape(-1, 784).astype('float32')
-# X_test = X_test.reshape(-1, 784).astype('float32')
-# X_train /= 255
-# X_test /= 255
+X_train = X_train.reshape(-1, 784).astype('float32')/255 - 0.5
+X_test = X_test.reshape(-1, 784).astype('float32')/255 - 0.5
 
 # for hog data
 num = 15

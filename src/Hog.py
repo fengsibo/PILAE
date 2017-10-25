@@ -4,33 +4,37 @@ import numpy as np
 import time
 
 hog_descriptor = [
-    {'orientations': 9, 'block': (8, 8), 'cell': (3, 3)},
+    {'orientations': 9, 'block': (8, 8), 'cell': (3, 3)}, #0
     {'orientations': 9, 'block': (8, 8), 'cell': (2, 2)},
-    {'orientations': 9, 'block': (8, 8), 'cell': (1, 1)},
     {'orientations': 12, 'block': (8, 8), 'cell': (3, 3)},
     {'orientations': 12, 'block': (8, 8), 'cell': (2, 2)},
-    {'orientations': 12, 'block': (8, 8), 'cell': (1, 1)},
     {'orientations': 15, 'block': (8, 8), 'cell': (3, 3)},
     {'orientations': 15, 'block': (8, 8), 'cell': (2, 2)},
-    {'orientations': 15, 'block': (8, 8), 'cell': (1, 1)},
     {'orientations': 18, 'block': (8, 8), 'cell': (3, 3)},
     {'orientations': 18, 'block': (8, 8), 'cell': (2, 2)},
-    {'orientations': 18, 'block': (8, 8), 'cell': (1, 1)},
     {'orientations': 24, 'block': (8, 8), 'cell': (3, 3)},
-    {'orientations': 24, 'block': (8, 8), 'cell': (2, 1)},
-    {'orientations': 24, 'block': (8, 8), 'cell': (1, 1)},
+    {'orientations': 24, 'block': (8, 8), 'cell': (2, 2)},
     {'orientations': 9, 'block': (12, 12), 'cell': (3, 3)},
     {'orientations': 9, 'block': (12, 12), 'cell': (2, 2)},
-    {'orientations': 9, 'block': (12, 12), 'cell': (1, 1)},
     {'orientations': 12, 'block': (12, 12), 'cell': (2, 2)},
-    {'orientations': 12, 'block': (12, 12), 'cell': (1, 1)},
     {'orientations': 15, 'block': (12, 12), 'cell': (2, 2)},
-    {'orientations': 15, 'block': (12, 12), 'cell': (1, 1)},
     {'orientations': 18, 'block': (12, 12), 'cell': (2, 2)},
-    {'orientations': 18, 'block': (12, 12), 'cell': (1, 1)},
     {'orientations': 24, 'block': (12, 12), 'cell': (2, 2)},
-    {'orientations': 24, 'block': (12, 12), 'cell': (1, 1)},
+    {'orientations': 36, 'block': (8, 8), 'cell': (3, 3)}, #16
+    {'orientations': 36, 'block': (8, 8), 'cell': (2, 2)},
+    {'orientations': 48, 'block': (8, 8), 'cell': (3, 3)},
+    {'orientations': 48, 'block': (8, 8), 'cell': (2, 2)},
+    {'orientations': 60, 'block': (8, 8), 'cell': (3, 3)},
+    {'orientations': 60, 'block': (8, 8), 'cell': (2, 2)},
+    {'orientations': 72, 'block': (8, 8), 'cell': (3, 3)},
+    {'orientations': 72, 'block': (8, 8), 'cell': (2, 2)},
+    {'orientations': 84, 'block': (8, 8), 'cell': (3, 3)},
+    {'orientations': 84, 'block': (8, 8), 'cell': (2, 2)},
+    {'orientations': 96, 'block': (8, 8), 'cell': (3, 3)},
+    {'orientations': 96, 'block': (8, 8), 'cell': (2, 2)},
 ]
+
+hog_arr = [0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18, 20, 22, 24]
 
 def extract_hog_featuer(X, type, num):
     input_X = X
@@ -64,17 +68,18 @@ def load_hog(path, num):
             X_test = np.concatenate((X_test, m_test), axis=1)
     return X_train, X_test
 
-# if __name__ == "__main__":
-#     (X_train, y_train), (X_test, y_test) = tools.load_MNISTData()
-#     # hog_f = hog(X_train[0], 24, (12, 12), (2, 2))
-#     # print(hog_f.__len__())
+if __name__ == "__main__":
+    (X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/mnist/mnist.npz")
+    hog_f = hog(X_train[0], 96, (8, 8), (2, 2))
+    print(hog_f)
+    print(hog_f.__len__())
 #
-#     len = hog_descriptor.__len__()
-#     i = 0
-#     while i < len:
-#         extract_hog_featuer(X_train, "mnist/mnist_hog_feature_train", i)
-#         extract_hog_featuer(X_test, "mnist/mnist_hog_feature_test", i)
-#         i += 1
+    len = hog_descriptor.__len__()
+    i = 16
+    while i < len:
+        extract_hog_featuer(X_train, "mnist/mnist_hog_feature_train", i)
+        extract_hog_featuer(X_test, "mnist/mnist_hog_feature_test", i)
+        i += 1
 
     # X_train, y_train = tools.load_fashionMNIST()
     # X_test, y_test = tools.load_fashionMNIST(kind='t10k')
