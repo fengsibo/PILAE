@@ -1,5 +1,6 @@
 import pickle
 import numpy as np
+import matplotlib as plt
 
 def save_pickle(file, filesavepath):
     filepath = open(filesavepath, "wb")
@@ -67,7 +68,7 @@ def load_cifar10(cifar10_dir):
     return (X_train, y_train), (X_test, y_test)
 
 
-def draw_line_chart(csvfile, savename, x_name, y_name_1, y_name_2,):
+def draw_line_chart12(csvfile, savename, x_name, y_name_1, y_name_2,):
     import matplotlib.pyplot as plt
     import pandas as pd
     csv = pd.read_csv(csvfile)
@@ -84,6 +85,46 @@ def draw_line_chart(csvfile, savename, x_name, y_name_1, y_name_2,):
     plt.savefig('../eps/'+savename)
     plt.show()
 
-# path = "../csv_file/fashion_mnist/fashion_mnist_maps.csv"
-# draw_line_chart(path, 'fashion_mnist_maps_acc.eps','maps', 'train_acc', 'test_acc')
+def draw_line_chart11(csvfile, savename, x_name, y_name):
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    csv = pd.read_csv(csvfile)
+    x = csv[x_name]
+    y = csv[y_name]
+    plt.figure()
+    plt.plot(x, y,  marker='o')
+    plt.xlabel('number of maps')
+    plt.ylabel('accuracy')
+    plt.grid()
+    plt.legend()
+    plt.savefig('../eps/'+savename)
+    plt.show()
+
+def draw_3D(csvfile, savename, x_name, y_name, z_name1, z_name2):
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
+    import pandas as pd
+    from scipy.interpolate import griddata
+    csv = pd.read_csv(csvfile)
+    x = csv[x_name]
+    y = csv[y_name]
+    z1 = csv[z_name1]
+    z2 = csv[z_name2]
+    # xx, yy = np.meshgrid(x, y)
+    # zz = griddata(x, y, z, xx, yy)
+    ax = plt.subplot(111, projection='3d')
+    ax.scatter(x, y, z1)
+    ax.scatter(x, y, z2)
+    # ax.plot_trisurf(x, y, z)
+    ax.set_xlabel('k')
+    ax.set_ylabel('alpha')
+    ax.set_zlabel('acc')
+
+    plt.savefig('../eps/'+savename)
+    plt.show()
+
+
+path = "../log/mnist_mapid_acc.csv"
+draw_line_chart12(path, "mnist_hog_map_acc.eps", 'map', 'train_acc', 'test_acc')
+# draw_3D(path, 'mnist_k_alpha_acc.eps', 'k', 'alpha', 'train_acc', 'test_acc')
 
