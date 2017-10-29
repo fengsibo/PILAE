@@ -68,6 +68,15 @@ def load_cifar10(cifar10_dir):
     return (X_train, y_train), (X_test, y_test)
 
 
+def to_categorical(y, num_classes=None):
+    y = np.array(y, dtype='int').ravel()
+    if not num_classes:
+        num_classes = np.max(y) + 1
+    n = y.shape[0]
+    categorical = np.zeros((n, num_classes))
+    categorical[np.arange(n), y] = 1
+    return categorical
+
 def draw_line_chart12(csvfile, savename, x_name, y_name_1, y_name_2,):
     import matplotlib.pyplot as plt
     import pandas as pd
@@ -100,6 +109,30 @@ def draw_line_chart11(csvfile, savename, x_name, y_name):
     plt.savefig('../eps/'+savename)
     plt.show()
 
+def draw_line_chart14(csvfile, savename, x_name, y_name1, y_name2):
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    csv = pd.read_csv(csvfile)
+    x = csv[x_name]
+    y1 = csv[y_name1]
+    y2 = csv[y_name2]
+    csv2 = pd.read_csv("../log/mnist_mapid_acc10.csv")
+    y3 = csv2[y_name1]
+    y4 = csv2[y_name2]
+
+    plt.figure()
+    plt.plot(x, y1, marker=".")
+    plt.plot(x, y2, marker=".")
+    plt.plot(x, y3, marker=".")
+    plt.plot(x, y4, marker='.')
+
+    plt.xlabel('number of maps')
+    plt.ylabel('accuracy')
+    plt.grid()
+    plt.legend()
+    plt.savefig('../eps/'+savename)
+    plt.show()
+
 def draw_3D(csvfile, savename, x_name, y_name, z_name1, z_name2):
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
@@ -123,8 +156,8 @@ def draw_3D(csvfile, savename, x_name, y_name, z_name1, z_name2):
     plt.savefig('../eps/'+savename)
     plt.show()
 
-
-path = "../log/mnist_mapid_acc.csv"
-draw_line_chart12(path, "mnist_hog_map_acc.eps", 'map', 'train_acc', 'test_acc')
+#
+# path = "../log/mnist_mapid_acc1.csv"
+# draw_line_chart14(path, "mnist_hog_map_acc.eps", 'map', 'train_acc', 'test_acc')
 # draw_3D(path, 'mnist_k_alpha_acc.eps', 'k', 'alpha', 'train_acc', 'test_acc')
 

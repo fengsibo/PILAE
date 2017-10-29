@@ -1,3 +1,7 @@
+import sys
+import os
+workpath = os.path.abspath("..")
+sys.path.append(workpath)
 import numpy as np
 import math
 import time
@@ -37,7 +41,7 @@ class PILAE(object):
         dim_x = input_X.shape[1]
         rank_x = np.sum(s > 1e-3)
         print("the ", layer, " layer, dim_x:", dim_x, " rank_x:", rank_x)
-        S = np.zeros((U.shape[1], V.shape[0]))
+        S = np.zeros((U.shape[1], transV.shape[0]))
         S[:s.shape[0], :s.shape[0]] = np.diag(s)
         V = transV.T
         transU = U.T
@@ -61,23 +65,35 @@ class PILAE(object):
         print("the ", layer, " layer train time cost:%.2f" %(t2 - t1))
         return W_d.T
 
-    def fit(self, train_X, layer):
+    def fit(self, X, y, layer, one_hot=1):
         t1 = time.time()
-        X = train_X
+        m, n = X.shape
+        split = int(5*m/6)
+        train_X = X[: split]
+        train_y = y[: split]
+        valid_X = X[split:]
+        valid_y = y[split:]
+        if one_hot:
+            train_y = tools.to_categorical(train_y)
+            valid_y = tools.to_categorical(valid_y)
         for i in range(layer):
-            w = self.autoEncoder(X, i)
+            w = self.autoEncoder(train_X, i)
             self.weight.append(w)
-            H = self.activeFunction(X.dot(w), self.acFunc)
+            train_H = self.activeFunction(train_X.dot(w), self.acFunc)
+            valid_H = self.activeFunction(valid_X.dot(w), self.acFunc)
+            H = train_H
             invH = np.linalg.inv(H.T.dot(H) + np.eye(H.shape[1]) * self.k) # recompute W_d
-            W_d = invH.dot(H.T).dot(X)
+            W_d = invH.dot(H.T).dot(train_X)
             # H = H/(H.max() - H.min())
             O = H.dot(W_d)
-            meanSquareError = mean_squared_error(X, O)
+            meanSquareError = mean_squared_error(train_X, O)
             print("the ", i, " layer meanSquareError:%.2f" % meanSquareError)
-            lossF = H.dot(np.linalg.pinv(H)) - np.ones((H.shape[0], H.shape[0]))
-            error = np.linalg.norm(lossF)
-            print("the ", i, " layer lossError:%.2f" % error)
-            X = H
+            # lossF = H.dot(np.linalg.pinv(H)) - np.ones((H.shape[0], H.shape[0]))
+            # error = np.linalg.norm(lossF)
+            # print("the ", i, " layer lossError:%.2f" % error)
+            self.PIL_classifier(train_H, train_y, valid_H, valid_y)
+            train_X = train_H
+            valid_X = valid_H
 
         t2 = time.time()
         print("fit cost time :%.2f" %(t2 - t1))
@@ -105,6 +121,16 @@ class PILAE(object):
         self.test_acc = accuracy_score(test_predict, test_y)*100
         print("Accuracy of test data set: %.2f" %self.test_acc, "%")
 
+    def PIL_classifier(self, train_X, train_y, test_X, test_y):
+        from sklearn.metrics import accuracy_score
+        invH = np.linalg.inv(train_X.T.dot(train_X) + np.eye(train_X.shape[1]) * 1)  # recompute W_d
+        pred_W = invH.dot(train_X.T).dot(train_y)
+        train_predict = train_X.dot(pred_W)
+        test_predict = test_X.dot(pred_W)
+        self.train_acc = accuracy_score(train_predict, train_y) * 100
+        print("Accuracy of train data set: %.2f" % self.train_acc, "%")
+        self.test_acc = accuracy_score(test_predict, test_y) * 100
+        print("Accuracy of test data set: %.2f" % self.test_acc, "%")
 
 
     def regression_classifier(self, train_X, train_y):

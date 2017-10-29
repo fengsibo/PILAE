@@ -13,14 +13,14 @@ import csv
 
 
 (X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/mnist/mnist.npz")
-train_data = np.concatenate((X_train, X_test), axis=1)
-n, p, q = train_data.shape
-train_data -= np.mean(train_data, axis=1)
-train_data /= np.std(train_data, axis=1)
-X_train = train_data[0: 60000]
-X_test = train_data[60000: 70000]
-# X_train = X_train.reshape(-1, p*q).astype('float32')/255
-# X_test = X_test.reshape(-1, 784).astype('float32')/255
+# train_data = np.concatenate((X_train, X_test), axis=1)
+# n, p, q = train_data.shape
+# train_data -= np.mean(train_data, axis=1)
+# train_data /= np.std(train_data, axis=1)
+# X_train = train_data[0: 60000]
+# X_test = train_data[60000: 70000]
+X_train = X_train.reshape(-1, 784).astype('float32')/255
+X_test = X_test.reshape(-1, 784).astype('float32')/255
 
 # # for hog data
 # # for i in range(1, 27):
@@ -52,9 +52,9 @@ num = 0
 # X_test = preprocessing.scale(X_test, axis=1)
 
 t1 = time.time()
-pilae = rp.PILAE(k=2.5, alpha=0.9, beta=0.8, activeFunc='tanh')
-pilae.fit(X_train, layer=1)
-pilae.predict(X_train, y_train, X_test, y_test)
+pilae = rp.PILAE(k=0.9, alpha=0.9, beta=0.8, activeFunc='sig')
+pilae.fit(X_train, y_train, layer=5)
+# pilae.predict(X_train, y_train, X_test, y_test)
 t2 = time.time()
 cost_time = t2 - t1
 print("Total cost time: %.2f" %cost_time)

@@ -151,7 +151,7 @@ if __name__ == '__main__':
 
 
 # mnist data++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    (X_train, y_train), (X_test, y_test) = load_data("../data/mnist.npz")
+    (X_train, y_train), (X_test, y_test) = load_data("../dataset/mnist.npz")
 
     data = X_train
     X_train = X_train.reshape(-1, 784).astype('float32')
