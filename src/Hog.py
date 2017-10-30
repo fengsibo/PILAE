@@ -2,16 +2,17 @@ import src.tools as tools
 from skimage.feature import hog
 import numpy as np
 import time
+from sklearn import preprocessing
 
 hog_descriptor = [
     {'orientations': 9, 'block': (8, 8), 'cell': (3, 3)}, #0
     {'orientations': 9, 'block': (8, 8), 'cell': (2, 2)},
     {'orientations': 12, 'block': (8, 8), 'cell': (3, 3)},
     {'orientations': 12, 'block': (8, 8), 'cell': (2, 2)},
-    {'orientations': 15, 'block': (8, 8), 'cell': (3, 3)},
+    {'orientations': 15, 'block': (8, 8), 'cell': (3, 3)}, #4
     {'orientations': 15, 'block': (8, 8), 'cell': (2, 2)},
     {'orientations': 18, 'block': (8, 8), 'cell': (3, 3)},
-    {'orientations': 18, 'block': (8, 8), 'cell': (2, 2)},
+    {'orientations': 18, 'block': (8, 8), 'cell': (2, 2)}, #7
     {'orientations': 24, 'block': (8, 8), 'cell': (3, 3)},
     {'orientations': 24, 'block': (8, 8), 'cell': (2, 2)},
     {'orientations': 9, 'block': (12, 12), 'cell': (1, 1)}, #10
@@ -77,25 +78,31 @@ def select_hog(path, list):
             j += 1
             X_train = tools.load_pickle(hog_train_plk_path)
             X_test = tools.load_pickle(hog_test_plk_path)
+            minmax_scaler = preprocessing.MinMaxScaler()
+            X_train = minmax_scaler.fit_transform(X_train)
+            X_test = minmax_scaler.fit_transform(X_test)
         else:
             m_train = tools.load_pickle(hog_train_plk_path)
             m_test = tools.load_pickle(hog_test_plk_path)
+            minmax_scaler = preprocessing.MinMaxScaler()
+            m_train = minmax_scaler.fit_transform(m_train)
+            m_test = minmax_scaler.fit_transform(m_test)
             X_train = np.concatenate((X_train, m_train), axis=1)
             X_test = np.concatenate((X_test, m_test), axis=1)
     return X_train, X_test
 
-if __name__ == "__main__":
-    (X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/mnist/mnist.npz")
-    hog_f = hog(X_train[0], 96, (8, 8), (2, 2))
-    print(hog_f)
-    print(hog_f.__len__())
-#
-    len = hog_descriptor.__len__()
-    i = 16
-    while i < len:
-        extract_hog_featuer(X_train, "mnist/mnist_hog_feature_train", i)
-        extract_hog_featuer(X_test, "mnist/mnist_hog_feature_test", i)
-        i += 1
+# if __name__ == "__main__":
+#     (X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/mnist/mnist.npz")
+#     hog_f = hog(X_train[0], 96, (8, 8), (2, 2))
+#     print(hog_f)
+#     print(hog_f.__len__())
+# #
+#     len = hog_descriptor.__len__()
+#     i = 16
+#     while i < len:
+#         extract_hog_featuer(X_train, "mnist/mnist_hog_feature_train", i)
+#         extract_hog_featuer(X_test, "mnist/mnist_hog_feature_test", i)
+#         i += 1
 
     # X_train, y_train = tools.load_fashionMNIST()
     # X_test, y_test = tools.load_fashionMNIST(kind='t10k')

@@ -117,9 +117,10 @@ def draw_line_chart(savename, x, y, xlabel, ylabel):
     ax = plt.figure()
     plt.plot(n, y,  marker='o')
     plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
+
     plt.xticks(n, x, rotation=30)
     # plt.xtickslabel(['1(776)', '2(698)', '3(628)', '4(565)', '5(508)', '6(457)', '7(449)', '8(422)', '9(389)', '10(356)'])
+    plt.ylabel(ylabel)
     plt.grid(which='major')
     plt.legend()
     plt.savefig('../eps/'+savename)
@@ -172,14 +173,35 @@ def draw_3D(csvfile, savename, x_name, y_name, z_name1, z_name2):
     plt.savefig('../eps/'+savename)
     plt.show()
 
+def draw_bar(savename):
+    import matplotlib.pyplot as plt
+    size = 3
+    x = np.arange(size)
+    a = [34.89, 33.87, 72.37]
+    b = [551.72, 552.87, 698.34]
+    xl = ['training time \n on MNIST', 'training time on \n Fashion-MNIST', 'training time \n on CIFAR-10']
+    total_width, n = 0.54, 2
+    width = total_width / n
+    x = x - (total_width - width)
+    plt.figure()
+    plt.bar(x, a, width=width)
+    plt.bar(x + width, b, width=width)
+    plt.ylabel('time(s)')
+    plt.xticks(x, xl,)
+    plt.legend()
+    plt.savefig('../eps/' + savename)
+    plt.show()
 #
-# path = "../csv/mnist_layer_rank.csv"
-# draw_line_chart11(path, "mnist_layer_rank.eps", 'layer', 'train_acc', 'test_acc')
+# path = "../csv/fashionmnist_maps_acc.csv"
+# draw_line_chart12(path, "fashionmnist_hog_maps_acc.eps", 'map', 'train_acc', 'test_acc')
 # draw_3D(path, 'mnist_k_alpha_acc.eps', 'k', 'alpha', 'train_acc', 'test_acc')
 
-y = [1, 1, 1, 1, 722/832., 158/821., 85/754., 24/687., 5/620., 2/558.]
-# x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-x = ['1(972)', '2(923)', '3(876)', '4(832)', '5(821)', '6(754)', '7(689)', '8(620)', '9(558)', '10(502)']
 
-draw_line_chart("cifar10_rank_layers.eps", x, y, 'Hidden layers', 'Rank')
+# y = [2660/4266., 1, 1, 1, 1, 1002/2691., 91/2522., 4/2278., 2/2050., 2/1845.]
+# # x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+# x = ['1(4105)', '2(3694)', '3(3324)', '4(2991)', '5(2691)', '6(2522)', '7(2278)', '8(2050)', '9(1845)', '10(1660)']
+#
+# draw_line_chart("mnist_hog_rank_layers.eps", x, y, 'Hidden layers', 'Rank')
+# draw_bar('train_time.eps')
+
 

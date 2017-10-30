@@ -10,31 +10,28 @@ import numpy as np
 import time
 import multiprocessing
 import csv
+num = 0
 
-
-(X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/mnist/mnist.npz")
-# train_data = np.concatenate((X_train, X_test), axis=1)
-# n, p, q = train_data.shape
-# train_data -= np.mean(train_data, axis=1)
-# train_data /= np.std(train_data, axis=1)
-# X_train = train_data[0: 60000]
-# X_test = train_data[60000: 70000]
+DATASET = 'mnist'
+(X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/"+DATASET+"/"+DATASET+".npz")
 X_train = X_train.reshape(-1, 784).astype('float32')/255
 X_test = X_test.reshape(-1, 784).astype('float32')/255
 
 # # for hog data
-# # for i in range(1, 27):
-num = 0
-# print("the "+str(num)+" scriptor")
-# X_train, X_test = hg.load_hog("../data/mnist/mnist", 1, num)
-# X_train *= 10
-# X_test *= 10
+# for i in range(1, 27):
+#     num = i
+#     print("the "+str(num)+" scriptor")
+#     X_train, X_test = hg.load_hog("../data/cifar10/cifar10", 0, num)
 
+# data_path = "../data/fashionmnist/fashionmnist"
+# hog_list = [0, 2, 4, 6, 8, 16, 18, 20, 22, 24, 26]
+# X_train, X_test = hg.select_hog(data_path, hog_list)
+# print(X_train.max(), X_train.min())
 # print(X_train.shape, X_test.shape)
 
-# minmax_scaler = preprocessing.MinMaxScaler()
-# X_train = minmax_scaler.fit_transform(X_train)
-# X_test = minmax_scaler.fit_transform(X_test)
+minmax_scaler = preprocessing.MinMaxScaler()
+X_train = minmax_scaler.fit_transform(X_train)
+X_test = minmax_scaler.fit_transform(X_test)
 
 # train_mean = X_train.mean(axis=1)
 # train_mean = train_mean.reshape(60000, 1)
@@ -52,14 +49,23 @@ num = 0
 # X_test = preprocessing.scale(X_test, axis=1)
 
 t1 = time.time()
-pilae = rp.PILAE(k=0.9, alpha=0.9, beta=0.8, activeFunc='sig')
-pilae.fit(X_train, y_train, layer=5)
-# pilae.predict(X_train, y_train, X_test, y_test)
+k_list = [0.78, 0.3]
+pilk_list = [1, 1]
+pilae = rp.PILAE(layer=2, k=k_list, pilk=pilk_list, alpha=0.9, beta=0.9, activeFunc='sig')
+pilae.fit(X_train, y_train)
+pilae.predict(X_train, y_train, X_test, y_test)
 t2 = time.time()
 cost_time = t2 - t1
 print("Total cost time: %.2f" %cost_time)
 # write into .csv file
-with open("../log/mnist.csv", 'at+') as csvfile:
+with open("../log/"+DATASET+"_maps_acc.csv", 'at+') as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerow(["map", "dims", "layer", "time", "train_acc", "test_acc", "k", "alpha", "beta", "acf"])
-    writer.writerow([num, X_train.shape[1], pilae.layer, cost_time, pilae.train_acc, pilae.test_acc, pilae.k, pilae.alpha, pilae.beta, pilae.acFunc])
+    if num == 1:
+        writer.writerow(["map", "dims", "layer", "time", "train_acc", "test_acc", "k", "alpha", "beta", "acf"])
+        writer.writerow(
+            [num, X_train.shape[1], pilae.layer, cost_time, pilae.train_acc, pilae.test_acc, pilae.k, pilae.alpha,
+             pilae.beta, pilae.acFunc])
+    else:
+        writer.writerow(
+            [num, X_train.shape[1], pilae.layer, cost_time, pilae.train_acc, pilae.test_acc, pilae.k, pilae.alpha,
+             pilae.beta, pilae.acFunc])
