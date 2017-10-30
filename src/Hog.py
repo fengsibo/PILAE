@@ -68,6 +68,22 @@ def load_hog(path, startnum, endnum):
             X_test = np.concatenate((X_test, m_test), axis=1)
     return X_train, X_test
 
+def select_hog(path, list):
+    j = 0
+    for i in list:
+        hog_train_plk_path = path + "_hog_feature_train_" + str(i) + ".plk"
+        hog_test_plk_path = path + "_hog_feature_test_" + str(i) + ".plk"
+        if j == 0:
+            j += 1
+            X_train = tools.load_pickle(hog_train_plk_path)
+            X_test = tools.load_pickle(hog_test_plk_path)
+        else:
+            m_train = tools.load_pickle(hog_train_plk_path)
+            m_test = tools.load_pickle(hog_test_plk_path)
+            X_train = np.concatenate((X_train, m_train), axis=1)
+            X_test = np.concatenate((X_test, m_test), axis=1)
+    return X_train, X_test
+
 if __name__ == "__main__":
     (X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/mnist/mnist.npz")
     hog_f = hog(X_train[0], 96, (8, 8), (2, 2))

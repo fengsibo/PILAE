@@ -109,6 +109,22 @@ def draw_line_chart11(csvfile, savename, x_name, y_name):
     plt.savefig('../eps/'+savename)
     plt.show()
 
+def draw_line_chart(savename, x, y, xlabel, ylabel):
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    n = range(len(x))
+    y = y
+    ax = plt.figure()
+    plt.plot(n, y,  marker='o')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.xticks(n, x, rotation=30)
+    # plt.xtickslabel(['1(776)', '2(698)', '3(628)', '4(565)', '5(508)', '6(457)', '7(449)', '8(422)', '9(389)', '10(356)'])
+    plt.grid(which='major')
+    plt.legend()
+    plt.savefig('../eps/'+savename)
+    plt.show()
+
 def draw_line_chart14(csvfile, savename, x_name, y_name1, y_name2):
     import matplotlib.pyplot as plt
     import pandas as pd
@@ -157,7 +173,13 @@ def draw_3D(csvfile, savename, x_name, y_name, z_name1, z_name2):
     plt.show()
 
 #
-# path = "../log/mnist_mapid_acc1.csv"
-# draw_line_chart14(path, "mnist_hog_map_acc.eps", 'map', 'train_acc', 'test_acc')
+# path = "../csv/mnist_layer_rank.csv"
+# draw_line_chart11(path, "mnist_layer_rank.eps", 'layer', 'train_acc', 'test_acc')
 # draw_3D(path, 'mnist_k_alpha_acc.eps', 'k', 'alpha', 'train_acc', 'test_acc')
+
+y = [1, 1, 1, 1, 722/832., 158/821., 85/754., 24/687., 5/620., 2/558.]
+# x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+x = ['1(972)', '2(923)', '3(876)', '4(832)', '5(821)', '6(754)', '7(689)', '8(620)', '9(558)', '10(502)']
+
+draw_line_chart("cifar10_rank_layers.eps", x, y, 'Hidden layers', 'Rank')
 
