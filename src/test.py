@@ -14,8 +14,8 @@ num = 0
 
 DATASET = 'mnist'
 (X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/"+DATASET+"/"+DATASET+".npz")
-X_train = X_train.reshape(-1, 784).astype('float32')/255
-X_test = X_test.reshape(-1, 784).astype('float32')/255
+# X_train = X_train.reshape(-1, 784).astype('float32')/255
+# X_test = X_test.reshape(-1, 784).astype('float32')/255
 
 # # for hog data
 # for i in range(1, 27):
@@ -23,11 +23,10 @@ X_test = X_test.reshape(-1, 784).astype('float32')/255
 #     print("the "+str(num)+" scriptor")
 #     X_train, X_test = hg.load_hog("../data/cifar10/cifar10", 0, num)
 
-# data_path = "../data/fashionmnist/fashionmnist"
-# hog_list = [0, 2, 4, 6, 8, 16, 18, 20, 22, 24, 26]
-# X_train, X_test = hg.select_hog(data_path, hog_list)
-# print(X_train.max(), X_train.min())
-# print(X_train.shape, X_test.shape)
+data_path = "../data/fashionmnist/fashionmnist"
+hog_list = [0, 2, 4, 6, 8, 16, 18, 20, 22, 24, 26]
+X_train, X_test = hg.select_hog(data_path, hog_list)
+
 
 minmax_scaler = preprocessing.MinMaxScaler()
 X_train = minmax_scaler.fit_transform(X_train)
@@ -51,14 +50,14 @@ X_test = minmax_scaler.fit_transform(X_test)
 t1 = time.time()
 k_list = [0.78, 0.3]
 pilk_list = [1, 1]
-pilae = rp.PILAE(layer=2, k=k_list, pilk=pilk_list, alpha=0.9, beta=0.9, activeFunc='sig')
+pilae = rp.PILAE(k=k_list, pilk=pilk_list, alpha=0.9, beta=0.9, layer=2, activeFunc='sig')
 pilae.fit(X_train, y_train)
 pilae.predict(X_train, y_train, X_test, y_test)
 t2 = time.time()
 cost_time = t2 - t1
 print("Total cost time: %.2f" %cost_time)
 # write into .csv file
-with open("../log/"+DATASET+"_maps_acc.csv", 'at+') as csvfile:
+with open("../log/"+DATASET+"_hog.csv", 'at+') as csvfile:
     writer = csv.writer(csvfile)
     if num == 1:
         writer.writerow(["map", "dims", "layer", "time", "train_acc", "test_acc", "k", "alpha", "beta", "acf"])
