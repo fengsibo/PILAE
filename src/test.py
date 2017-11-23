@@ -14,8 +14,8 @@ num = 0
 
 DATASET = 'mnist'
 (X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/"+DATASET+"/"+DATASET+".npz")
-# X_train = X_train.reshape(-1, 784).astype('float32')/255
-# X_test = X_test.reshape(-1, 784).astype('float32')/255
+X_train = X_train.reshape(-1, 784).astype('float32')/255
+X_test = X_test.reshape(-1, 784).astype('float32')/255
 
 # # for hog data
 # for i in range(1, 27):
@@ -23,14 +23,14 @@ DATASET = 'mnist'
 #     print("the "+str(num)+" scriptor")
 #     X_train, X_test = hg.load_hog("../data/cifar10/cifar10", 0, num)
 
-data_path = "../data/fashionmnist/fashionmnist"
-hog_list = [0, 2, 4, 6, 8, 16, 18, 20, 22, 24, 26]
-X_train, X_test = hg.select_hog(data_path, hog_list)
+# data_path = "../data/fashionmnist/fashionmnist"
+# hog_list = [0, 2, 4, 6, 8, 16, 18, 20, 22, 24, 26]
+# X_train, X_test = hg.select_hog(data_path, hog_list)
 
 
-minmax_scaler = preprocessing.MinMaxScaler()
-X_train = minmax_scaler.fit_transform(X_train)
-X_test = minmax_scaler.fit_transform(X_test)
+# minmax_scaler = preprocessing.MinMaxScaler()
+# X_train = minmax_scaler.fit_transform(X_train)
+# X_test = minmax_scaler.fit_transform(X_test)
 
 # train_mean = X_train.mean(axis=1)
 # train_mean = train_mean.reshape(60000, 1)
@@ -48,8 +48,8 @@ X_test = minmax_scaler.fit_transform(X_test)
 # X_test = preprocessing.scale(X_test, axis=1)
 
 t1 = time.time()
-k_list = [0.78, 0.3]
-pilk_list = [1, 1]
+k_list = [0.78, 0.0]
+pilk_list = [0.04, 0.03]
 pilae = rp.PILAE(k=k_list, pilk=pilk_list, alpha=0.9, beta=0.9, layer=2, activeFunc='sig')
 pilae.fit(X_train, y_train)
 pilae.predict(X_train, y_train, X_test, y_test)

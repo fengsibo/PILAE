@@ -68,35 +68,31 @@ class PILAE(object):
     def fit(self, X, y, one_hot=1):
         t1 = time.time()
         m, n = X.shape
-        split = int(5*m/6) #split valid data from train data
-        train_X = X[: split]
-        train_y = y[: split]
-        valid_X = X[split:]
-        valid_y = y[split:]
+        train_X = X
         if one_hot: # convert label to one-hot encode
-            train_y = tools.to_categorical(train_y)
-            valid_y = tools.to_categorical(valid_y)
+            train_y = tools.to_categorical(y[ :50000])
+            valid_y = tools.to_categorical(y[50000: ])
         for i in range(self.layer):
             w = self.autoEncoder(train_X, i) # compute the i-th layer auto-encoder
             self.weight.append(w) # save the weight
             train_H = self.activeFunction(train_X.dot(w), self.acFunc)
-            valid_H = self.activeFunction(valid_X.dot(w), self.acFunc)
             H = train_H
             invH = np.linalg.inv(H.T.dot(H) + np.eye(H.shape[1]) * self.k[i]) # recompute W_d
             W_d = invH.dot(H.T).dot(train_X) #recompute the decoder weight of output O
             O = H.dot(W_d)
             meanSquareError = mean_squared_error(train_X, O)
             print("the ", i, " layer meanSquareError:%.2f" % meanSquareError)
-            u,s,v = np.linalg.svd(H, full_matrices=0)
+            u, s, v = np.linalg.svd(H, full_matrices=0)
             # print("H usv")
-            # lossF = u.dot(u.T) - np.ones((H.shape[0], H.shape[0]))
+            # lossF = u.T.dot(u) - np.eye((u.shape[0], u.shape[0]))
             # print("compute loosF")
             # error = np.linalg.norm(lossF)
             # print("compute norm")
-            # print("the ", i, " layer lossError:%.2f" % error)
-            self.PIL_classifier(train_H, train_y, valid_H, valid_y, i) #predict by PIL classifier
+            # print("the ", i, " layer Error:%.2f" % error)
+            pil_X = train_H[: 50000]
+            pil_V = train_H[50000:]
+            self.PIL_classifier(pil_X, train_y, pil_V, valid_y, i) #predict by PIL classifier
             train_X = train_H # assignment input data for the next layer(next cycle)
-            valid_X = valid_H
         t2 = time.time()
         print("fit cost time :%.2f" %(t2 - t1))
 
@@ -147,7 +143,7 @@ class PILAE(object):
 
     def regression_classifier(self, train_X, train_y):
         from sklearn.linear_model import LogisticRegression
-        model = LogisticRegression(solver="lbfgs", multi_class="multinomial", max_iter=200)
+        model = LogisticRegression(penalty='l2', solver="lbfgs", multi_class="multinomial", max_iter=200)
         model.fit(train_X, train_y)
         return model
 

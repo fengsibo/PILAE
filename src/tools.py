@@ -192,8 +192,8 @@ def draw_bar(savename):
     plt.savefig('../eps/' + savename)
     plt.show()
 #
-path = "../csv/cifar10_maps_acc.csv"
-draw_line_chart12(path, "cifar10_hog_maps_acc.eps", 'map', 'train_acc', 'test_acc')
+# path = "../csv/cifar10_maps_acc.csv"
+# draw_line_chart12(path, "cifar10_hog_maps_acc.eps", 'map', 'train_acc', 'test_acc')
 # draw_3D(path, 'mnist_k_alpha_acc.eps', 'k', 'alpha', 'train_acc', 'test_acc')
 
 
