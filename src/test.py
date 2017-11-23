@@ -48,11 +48,11 @@ X_test = X_test.reshape(-1, 784).astype('float32')/255
 # X_test = preprocessing.scale(X_test, axis=1)
 
 t1 = time.time()
-k_list = [0.78, 0.0]
-pilk_list = [0.04, 0.03]
-pilae = rp.PILAE(k=k_list, pilk=pilk_list, alpha=0.9, beta=0.9, layer=2, activeFunc='sig')
+k_list = [0.0, 0.0]
+pilk_list = [0.4, 0.3]
+pilae = rp.PILAE(k=k_list, pilk=pilk_list, alpha=0.9, beta=0.9, layer=1, activeFunc='sig')
 pilae.fit(X_train, y_train)
-pilae.predict(X_train, y_train, X_test, y_test)
+# pilae.predict(X_train, y_train, X_test, y_test)
 t2 = time.time()
 cost_time = t2 - t1
 print("Total cost time: %.2f" %cost_time)

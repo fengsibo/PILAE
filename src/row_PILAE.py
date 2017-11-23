@@ -8,6 +8,7 @@ import time
 from sklearn import preprocessing
 from sklearn.metrics import mean_squared_error
 import src.tools as tools
+import src.softmax as softmax
 
 
 class PILAE(object):
@@ -69,29 +70,38 @@ class PILAE(object):
         t1 = time.time()
         m, n = X.shape
         train_X = X
+        train_y = y[:50000]
+        valid_y = y[50000:]
         if one_hot: # convert label to one-hot encode
-            train_y = tools.to_categorical(y[ :50000])
-            valid_y = tools.to_categorical(y[50000: ])
+            train_onehot_y = tools.to_categorical(y[ :50000])
+            valid_onehot_y = tools.to_categorical(y[50000: ])
         for i in range(self.layer):
             w = self.autoEncoder(train_X, i) # compute the i-th layer auto-encoder
             self.weight.append(w) # save the weight
             train_H = self.activeFunction(train_X.dot(w), self.acFunc)
             H = train_H
+            print("H shape: ", H.shape)
+
             invH = np.linalg.inv(H.T.dot(H) + np.eye(H.shape[1]) * self.k[i]) # recompute W_d
             W_d = invH.dot(H.T).dot(train_X) #recompute the decoder weight of output O
             O = H.dot(W_d)
             meanSquareError = mean_squared_error(train_X, O)
             print("the ", i, " layer meanSquareError:%.2f" % meanSquareError)
+
             u, s, v = np.linalg.svd(H, full_matrices=0)
-            # print("H usv")
-            # lossF = u.T.dot(u) - np.eye((u.shape[0], u.shape[0]))
-            # print("compute loosF")
-            # error = np.linalg.norm(lossF)
-            # print("compute norm")
-            # print("the ", i, " layer Error:%.2f" % error)
-            pil_X = train_H[: 50000]
-            pil_V = train_H[50000:]
-            self.PIL_classifier(pil_X, train_y, pil_V, valid_y, i) #predict by PIL classifier
+            print("u shape: ", u.shape)
+            print("H usv")
+            hh = u.T.dot(u)
+            print(hh)
+            lossF = hh - np.eye((u.shape[1]))
+            print("compute loosF")
+            error = np.linalg.norm(lossF)
+            print("compute norm")
+            print("the ", i, " layer Error:%.2f" % error)
+            class_X = train_H[: 50000]
+            class_V = train_H[50000:]
+            self.PIL_classifier(class_X, train_onehot_y, class_V, valid_onehot_y, i) #predict by PIL classifier
+            self.predict(class_X, train_y, class_V, valid_y)
             train_X = train_H # assignment input data for the next layer(next cycle)
         t2 = time.time()
         print("fit cost time :%.2f" %(t2 - t1))
@@ -105,16 +115,16 @@ class PILAE(object):
 
     def predict(self, train_X, train_y, test_X, test_y):
         from sklearn.metrics import accuracy_score
-        train_feature = self.extractFeature(train_X)
-        test_feature = self.extractFeature(test_X)
+        # train_feature = self.extractFeature(train_X)
+        # test_feature = self.extractFeature(test_X)
 
-        model = self.regression_classifier(train_feature, train_y)
-        train_predict = model.predict(train_feature)
+        model = self.softmax_classifier(train_X, train_y)
+        train_predict = model.predict(train_X)
         self.train_acc = accuracy_score(train_predict, train_y)*100
-        print("Accuracy of train data set: %.2f" %self.train_acc, "%")
-        test_predict = model.predict(test_feature)
+        print("Accuracy of train data set SOFTMAX: %.2f" %self.train_acc, "%")
+        test_predict = model.predict(test_X)
         self.test_acc = accuracy_score(test_predict, test_y)*100
-        print("Accuracy of test data set: %.2f" %self.test_acc, "%")
+        print("Accuracy of test data set SOFTMAX: %.2f" %self.test_acc, "%")
 
     def PIL_classifier(self, train_X, train_y, test_X, test_y, layer):
         from sklearn.metrics import accuracy_score
@@ -123,9 +133,9 @@ class PILAE(object):
         train_predict = self.deal_onehot(train_X.dot(pred_W))
         test_predict = self.deal_onehot(test_X.dot(pred_W))
         self.train_acc = accuracy_score(train_predict, train_y) * 100
-        print("Accuracy of train data set: %.2f" % self.train_acc, "%")
+        print("Accuracy of train data set PIL: %.2f" % self.train_acc, "%")
         self.test_acc = accuracy_score(test_predict, test_y) * 100
-        print("Accuracy of test data set: %.2f" % self.test_acc, "%")
+        print("Accuracy of test data set PIL: %.2f" % self.test_acc, "%")
 
     def deal_onehot(self, matrix):
         onehot = self.activeFunction(matrix)
@@ -140,6 +150,10 @@ class PILAE(object):
                     row[i] = 0
         return onehot
 
+    def softmax_classifier(selfself, train_X, train_y):
+        model = softmax.softmax()
+        model.train(train_X, train_y)
+        return model
 
     def regression_classifier(self, train_X, train_y):
         from sklearn.linear_model import LogisticRegression
