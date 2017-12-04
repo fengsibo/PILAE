@@ -8,15 +8,13 @@ import time
 from sklearn import preprocessing
 from sklearn.metrics import mean_squared_error
 import src.tools as tools
-import src.softmax as softmax
 
 
 class PILAE(object):
-    def __init__(self, k, pilk, alpha=0.8, beta=0.9, layer=1, activeFunc='sig'):
+    def __init__(self, k, pilk, alpha, layer=1, activeFunc='sig'):
         self.k = k
         self.pilk = pilk
         self.alpha = alpha
-        self.beta = beta
         self.layer = layer
         self.train_acc = 0
         self.test_acc = 0
@@ -40,69 +38,65 @@ class PILAE(object):
 
     def autoEncoder(self, input_X, layer):
         t1 = time.time()
-        U, s, transV = np.linalg.svd(input_X, full_matrices=0) #compute SVD of the input matrix or feature, U: 2-D matrix ,s: 1-D singular values vector, transV: transpose matrix of matrix V
+        U, s, transV = np.linalg.svd(input_X, full_matrices=0)
         print("the ", layer, " layer SVD matrix shape:", "U:", U.shape, "s:", s.shape, "V:", transV.shape)  #(784, 784) (784,) (784, 60000)
-        dim_x = input_X.shape[1] # get dimesion of the input matrix
-        rank_x = np.sum(s > 1e-3) # get the rank of the imput matrix, the sum of the number of elements > 0 on the diagonal, consifer floating point error > 1e-3
+        dim_x = input_X.shape[1]
+        rank_x = np.linalg.matrix_rank(input_X)
         print("the ", layer, " layer, dim_x:", dim_x, " rank_x:", rank_x)
-        S = np.zeros((U.shape[1], transV.shape[0])) # S is a 1-D vector given by python, we convert it to 2-D diagonal matrix
-        S[:s.shape[0], :s.shape[0]] = np.diag(s)
-        V = transV.T # transpose matrix of matrix transV
-        transU = U.T # transpose matrix of matrix U
-        S[S != 0] = 1 / S[S != 0] # reciprocal of nonezero elements in matrix s
+        # S = np.zeros((U.shape[1], transV.shape[0]))
+        # S[:s.shape[0], :s.shape[0]] = np.diag(s)
+        # V = transV.T
+        transU = U.T
+        # S[S != 0] = 1 / S[S != 0]
         if rank_x < dim_x :
-            p = rank_x + self.alpha*(dim_x - rank_x)
+            p = rank_x + self.alpha[layer]*(dim_x - rank_x)
         else:
-            p = self.beta*dim_x
+            p = self.alpha[i]*dim_x
         print("the ", layer, " layer, cut p:", int(p))
-        transU = transU[:, 0:int(p)] # cut off matrix transU
+        transU = transU[:, 0:int(p)]
         print("the ", layer, " layer psedoinverse matrix shape:", "U:", transU.shape, "S:", S.shape, "V:", V.shape) #(705, 784) (784, 784) (784, 784)
-        input_H = U.dot(transU) # compute the input of hidden layer
+        # W_e = V.dot(S).dot(transU)
+        input_H = U.dot(transU)
 
-        H = self.activeFunction(input_H, self.acFunc) # compute the output of hidden layer
+        H = self.activeFunction(input_H, self.acFunc)
         invH = np.linalg.inv(H.T.dot(H) + np.eye(H.shape[1]) * self.k[layer])
-        W_d = invH.dot(H.T).dot(input_X) # compute decoder weight
+        W_d = invH.dot(H.T).dot(input_X)
         t2 = time.time()
         print("the ", layer, " layer train time cost:%.2f" %(t2 - t1))
-        return W_d.T # return the encoder of the autoencoder
+        return W_d.T
 
     def fit(self, X, y, one_hot=1):
         t1 = time.time()
         m, n = X.shape
-        train_X = X
-        train_y = y[:50000]
-        valid_y = y[50000:]
-        if one_hot: # convert label to one-hot encode
-            train_onehot_y = tools.to_categorical(y[ :50000])
-            valid_onehot_y = tools.to_categorical(y[50000: ])
+        split = int(5*m/6)
+        train_X = X[: split]
+        train_y = y[: split]
+        valid_X = X[split:]
+        valid_y = y[split:]
+        if one_hot:
+            train_y = tools.to_categorical(train_y)
+            valid_y = tools.to_categorical(valid_y)
         for i in range(self.layer):
-            w = self.autoEncoder(train_X, i) # compute the i-th layer auto-encoder
-            self.weight.append(w) # save the weight
+            w = self.autoEncoder(train_X, i)
+            self.weight.append(w)
             train_H = self.activeFunction(train_X.dot(w), self.acFunc)
+            valid_H = self.activeFunction(valid_X.dot(w), self.acFunc)
             H = train_H
-            print("H shape: ", H.shape)
-
             invH = np.linalg.inv(H.T.dot(H) + np.eye(H.shape[1]) * self.k[i]) # recompute W_d
-            W_d = invH.dot(H.T).dot(train_X) #recompute the decoder weight of output O
+            W_d = invH.dot(H.T).dot(train_X)
             O = H.dot(W_d)
             meanSquareError = mean_squared_error(train_X, O)
             print("the ", i, " layer meanSquareError:%.2f" % meanSquareError)
-
-            u, s, v = np.linalg.svd(H, full_matrices=0)
-            print("u shape: ", u.shape)
-            print("H usv")
-            hh = u.T.dot(u)
-            print(hh)
-            lossF = hh - np.eye((u.shape[1]))
-            print("compute loosF")
-            error = np.linalg.norm(lossF)
-            print("compute norm")
-            print("the ", i, " layer Error:%.2f" % error)
-            class_X = train_H[: 50000]
-            class_V = train_H[50000:]
-            self.PIL_classifier(class_X, train_onehot_y, class_V, valid_onehot_y, i) #predict by PIL classifier
-            self.predict(class_X, train_y, class_V, valid_y)
-            train_X = train_H # assignment input data for the next layer(next cycle)
+            # u,s,v = np.linalg.svd(H, full_matrices=0)
+            # print("H usv")
+            # lossF = u.dot(u.T) - np.ones((H.shape[0], H.shape[0]))
+            # print("compute loosF")
+            # error = np.linalg.norm(lossF)
+            # print("compute norm")
+            # print("the ", i, " layer lossError:%.2f" % error)
+            self.PIL_classifier(train_H, train_y, valid_H, valid_y, i)
+            train_X = train_H
+            valid_X = valid_H
         t2 = time.time()
         print("fit cost time :%.2f" %(t2 - t1))
 
@@ -114,28 +108,39 @@ class PILAE(object):
         return feature
 
     def predict(self, train_X, train_y, test_X, test_y):
-        from sklearn.metrics import accuracy_score
-        # train_feature = self.extractFeature(train_X)
-        # test_feature = self.extractFeature(test_X)
+        from sklearn.metrics import accuracy_score, recall_score, f1_score, classification_report
+        train_feature = self.extractFeature(train_X)
+        test_feature = self.extractFeature(test_X)
 
-        model = self.softmax_classifier(train_X, train_y)
-        train_predict = model.predict(train_X)
+        model = self.regression_classifier(train_feature, train_y)
+        train_predict = model.predict(train_feature)
+        test_predict = model.predict(test_feature)
+        print("==================softmax=================")
         self.train_acc = accuracy_score(train_predict, train_y)*100
-        print("Accuracy of train data set SOFTMAX: %.2f" %self.train_acc, "%")
-        test_predict = model.predict(test_X)
-        self.test_acc = accuracy_score(test_predict, test_y)*100
-        print("Accuracy of test data set SOFTMAX: %.2f" %self.test_acc, "%")
+        self.test_acc = accuracy_score(test_predict, test_y) * 100
+        print("Accuracy of data set: %.2f" %self.train_acc, "%", "%.2f" %self.test_acc, "%")
+        self.test_recall_score = recall_score(test_y, test_predict, average='micro')*100
+        self.test_f1_score = f1_score(test_y, test_predict, average='micro')*100
+        self.test_classification_report = classification_report(test_y, test_predict)
+        print("test recall & f1_score: %.2f" %self.test_recall_score, "%", "%.2f" %self.test_f1_score, "%")
+        print(self.test_classification_report)
+
 
     def PIL_classifier(self, train_X, train_y, test_X, test_y, layer):
-        from sklearn.metrics import accuracy_score
+        from sklearn.metrics import accuracy_score, recall_score, f1_score, classification_report
         invH = np.linalg.inv(train_X.T.dot(train_X) + np.eye(train_X.shape[1]) * self.pilk[layer])  # recompute W_d
         pred_W = invH.dot(train_X.T).dot(train_y)
         train_predict = self.deal_onehot(train_X.dot(pred_W))
         test_predict = self.deal_onehot(test_X.dot(pred_W))
         self.train_acc = accuracy_score(train_predict, train_y) * 100
-        print("Accuracy of train data set PIL: %.2f" % self.train_acc, "%")
         self.test_acc = accuracy_score(test_predict, test_y) * 100
-        print("Accuracy of test data set PIL: %.2f" % self.test_acc, "%")
+        print("==================pil=================")
+        print("Accuracy of data set: %.2f" % self.train_acc, "%", "%.2f" % self.test_acc, "%")
+        self.test_recall_score = recall_score(test_y, test_predict, average='micro') * 100
+        self.test_f1_score = f1_score(test_y, test_predict, average='micro') * 100
+        self.test_classification_report = classification_report(test_y, test_predict)
+        print("test recall & f1_score: %.2f" % self.test_recall_score, "%", "%.2f" % self.test_f1_score, "%")
+        print(self.test_classification_report)
 
     def deal_onehot(self, matrix):
         onehot = self.activeFunction(matrix)
@@ -150,14 +155,10 @@ class PILAE(object):
                     row[i] = 0
         return onehot
 
-    def softmax_classifier(selfself, train_X, train_y):
-        model = softmax.softmax()
-        model.train(train_X, train_y)
-        return model
 
     def regression_classifier(self, train_X, train_y):
         from sklearn.linear_model import LogisticRegression
-        model = LogisticRegression(penalty='l2', solver="lbfgs", multi_class="multinomial", max_iter=200)
+        model = LogisticRegression(solver="lbfgs", multi_class="multinomial", max_iter=200)
         model.fit(train_X, train_y)
         return model
 
