@@ -31,25 +31,6 @@ X_test = X_test.reshape(-1, 784).astype('float32')/255
 # hog_list = [0, 2, 4, 6, 8, 16, 18, 20, 22, 24, 26]
 # X_train, X_test = hg.select_hog(data_path, hog_list)
 
-
-# minmax_scaler = preprocessing.MinMaxScaler()
-# X_train = minmax_scaler.fit_transform(X_train)
-# X_test = minmax_scaler.fit_transform(X_test)
-
-# train_mean = X_train.mean(axis=1)
-# train_mean = train_mean.reshape(60000, 1)
-# train_std = X_train.std(axis=1)
-# train_std = train_std.reshape(60000, 1)
-# X_train = (X_train - train_mean)/train_std
-
-# test_mean = X_test.mean(axis=1)
-# test_mean = test_mean.reshape(10000, 1)
-# test_std = X_test.std(axis=1)
-# test_std = test_std.reshape(10000, 1)
-# X_test = (X_test - test_mean)/test_std
-
-# X_train = preprocessing.scale(X_train, axis=1)
-# X_test = preprocessing.scale(X_test, axis=1)
 # for i in range(1, 100):
 #     for j in range(1, 100):
 t1 = time.time()
