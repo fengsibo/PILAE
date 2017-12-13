@@ -47,16 +47,16 @@ class PILAE(object):
         """
         t1 = time.time()
         U, s, transV = np.linalg.svd(input_X, full_matrices=0)
-        print("the ", layer, " layer SVD matrix shape:", "U:", U.shape, "s:", s.shape, "V:", transV.shape)  #(784, 784) (784,) (784, 60000)
         dim_x = input_X.shape[1]
         rank_x = np.linalg.matrix_rank(input_X)
-        print("the ", layer, " layer, dim_x:", dim_x, " rank_x:", rank_x)
         transU = U.T
         if rank_x < dim_x :
             p = rank_x + self.alpha[layer]*(dim_x - rank_x)
         else:
             p = self.alpha[layer]*dim_x
-        print("the ", layer, " layer, cut p:", int(p))
+        print("[INFO] the {} layer message:")
+        print("the SVD matrix shape U:{}, s:{}, VT:{}".format(U.shape, s.shape, transV.shape))
+        print("the dim_x:{}, rank_x:{}, cut_p:{}".format(dim_x, rank_x, int(p)))
         transU = transU[:, 0:int(p)]
         input_H = U.dot(transU)
 
@@ -73,20 +73,24 @@ class PILAE(object):
         @param layer: the number of pil layers
         @return: the classcification result
         """
+        X = train_X
+        y = train_y
         layer = self.pil_layer
-        if layer == 0:
-            return
 
         for i in range(layer):
-            U, s, transV = np.linalg.svd(train_X, full_matrices=0)
-            dim_x = train_X.shape[1]
-            rank_x = np.linalg.matrix_rank(train_X)
-            transU = U.T[: self.pil_p[i]]
+            # U, s, transV = np.linalg.svd(X, full_matrices=0)
+            # dim_x = X.shape[1]
+            # rank_x = np.linalg.matrix_rank(X)
+            # transU = U.T
+            # transU = transU[:, 0: self.pil_p[i]]
+            pinvX = np.linalg.pinv(X)
+            transU = pinvX[:, 0: self.pil_p[i]]
+            print(X.shape, transU.shape)
             self.weight.append(transU)
-            tempH = U.dot(transU)
-            H = self.activeFunction(tempH, self.acFunc)
-        invH = np.linalg.inv(train_X.T.dot(train_X) + np.eye(train_X.shape[1]) * self.pilk)  # recompute W_d
-        pred_W = invH.dot(train_X.T).dot(train_y)
+            tempH = X.dot(transU)
+            X = self.activeFunction(tempH, self.acFunc)
+        invH = np.linalg.inv(X.T.dot(X) + np.eye(X.shape[1]) * self.pilk)  # recompute W_d
+        pred_W = invH.dot(X.T).dot(y)
         self.weight.append(pred_W)
 
 
@@ -96,13 +100,13 @@ class PILAE(object):
         t1 = time.time()
         for i in range(self.ae_layer):
             w = self.autoEncoder(train_X, i)
-            self.weight.append(w)
             H = self.activeFunction(train_X.dot(w), self.acFunc)
-            # invH = np.linalg.inv(H.T.dot(H) + np.eye(H.shape[1]) * self.k[i]) # recompute W_d
-            # W_d = invH.dot(H.T).dot(X)
-            # O = H.dot(W_d)
-            # meanSquareError = mean_squared_error(X, O)
-            # print("the ", i, " layer meanSquareError:%.2f" % meanSquareError)
+            invH = np.linalg.inv(H.T.dot(H) + np.eye(H.shape[1]) * self.k[i]) # recompute W_d
+            W_d = invH.dot(H.T).dot(X)
+            O = H.dot(W_d)
+            meanSquareError = mean_squared_error(X, O)
+            print("the ", i, " layer meanSquareError:%.2f" % meanSquareError)
+
             # u,s,v = np.linalg.svd(H, full_matrices=0)
             # print("H usv")
             # lossF = u.dot(u.T) - np.eye((H.shape[0], H.shape[0]))
@@ -110,9 +114,10 @@ class PILAE(object):
             # error = np.linalg.norm(lossF)
             # print("compute norm")
             # print("the ", i, " layer lossError:%.2f" % error)
+
             shuffleX, shuffley = self.random_shuffle(H, train_y)
-            (train_H, train_y, train_onehot_y), (valid_H, valid_y, valid_onehot_y) = self.split_set(shuffleX, shuffley)
-            self.PIL_classifier(train_H, train_onehot_y, valid_H, valid_onehot_y, self.pil_layer)
+            (train_H, train_y), (valid_H, valid_y) = self.split_set(shuffleX, shuffley)
+            self.PIL_classifier(train_H, train_y, valid_H, valid_y)
             self.predict(train_H, train_y, valid_H, valid_y)
             train_X = H
         t2 = time.time()
@@ -140,7 +145,9 @@ class PILAE(object):
         print(self.test_classification_report)
 
 
-    def PIL_classifier(self, train_X, train_y, test_X, test_y, layer):
+    def PIL_classifier(self, train_X, train_y, test_X, test_y):
+        train_y = tools.to_categorical(train_y)
+        test_y = tools.to_categorical(test_y)
         self.PIL_fit(train_X, train_y)
         predict_train = self.PIL_feedforward(train_X)
         predict_test = self.PIL_feedforward(test_X)
@@ -186,10 +193,7 @@ class PILAE(object):
         valid_H = X[split:]
         train_y = y[: split]
         valid_y = y[split:]
-        one_hot_y = tools.to_categorical(y)
-        train_onehot_y = one_hot_y[: split]
-        valid_onehot_y = one_hot_y[split:]
-        return (train_H, train_y, train_onehot_y), (valid_H, valid_y, valid_onehot_y)
+        return (train_H, train_y), (valid_H, valid_y)
 
     def regression_classifier(self, train_X, train_y):
         from sklearn.linear_model import LogisticRegression

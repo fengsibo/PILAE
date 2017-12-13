@@ -12,14 +12,14 @@ import multiprocessing
 import csv
 num = 0
 
-DATASET = 'pulsar'
-# (X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/"+DATASET+"/"+DATASET+".npz")
-# X_train = X_train.reshape(-1, 784).astype('float32')/255
-# X_test = X_test.reshape(-1, 784).astype('float32')/255
+DATASET = 'mnist'
+(X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/"+DATASET+"/"+DATASET+".npz")
+X_train = X_train.reshape(-1, 784).astype('float32')/255
+X_test = X_test.reshape(-1, 784).astype('float32')/255
 
-f = np.load("../dataset/PMPS/subbands.npz")
-X_train = f['X']
-y_train = f['y']
+# f = np.load("../dataset/PMPS/subbands.npz")
+# X_train = f['X']
+# y_train = f['y']
 
 # # for hog data
 # for i in range(1, 27):
@@ -50,28 +50,27 @@ y_train = f['y']
 
 # X_train = preprocessing.scale(X_train, axis=1)
 # X_test = preprocessing.scale(X_test, axis=1)
-for i in range(1, 100):
-    for j in range(1, 100):
-        t1 = time.time()
-        k_list = [i/100., 0.0]
-        pilk_list = [j/100., 0.3]
-        alpha_list = [0.78, 0.69]
-        pilae = rp.PILAE(k=k_list, pilk=pilk_list, alpha=0.9, layer=1, activeFunc='sig')
-        pilae.fit(X_train, y_train)
-        # pilae.predict(X_train, y_train, X_test, y_test)
-        t2 = time.time()
-        cost_time = t2 - t1
-        print("Total cost time: %.2f" %cost_time)
-        # write into .csv file
-        with open("../log/pulsar.csv", 'at+') as csvfile:
-            writer = csv.writer(csvfile)
-            if num == 0:
-                num = 1
-                writer.writerow(["map", "dims", "layer", "time", "train_acc", "test_acc", "k", "alpha", "beta", "acf"])
-                writer.writerow(
-                    [num, X_train.shape[1], pilae.layer, cost_time, pilae.train_acc, pilae.test_acc, pilae.k, pilae.alpha,
-                     pilae.beta, pilae.acFunc])
-            else:
-                writer.writerow(
-                    [num, X_train.shape[1], pilae.layer, cost_time, pilae.train_acc, pilae.test_acc, pilae.k, pilae.alpha,
-             pilae.beta, pilae.acFunc])
+# for i in range(1, 100):
+#     for j in range(1, 100):
+t1 = time.time()
+k_list = [0.78, 0.43]
+pilk = 0.07
+alpha_list = [0.8, 0.7]
+pil_p = [2000, 1000]
+pilae = rp.PILAE(k=k_list, pilk=pilk, alpha=alpha_list, pil_p = pil_p, AE_layer=1, PIL_layer=2, activeFunc='sig')
+pilae.fit(X_train, y_train)
+# pilae.predict(X_train, y_train, X_test, y_test)
+t2 = time.time()
+cost_time = t2 - t1
+print("Total cost time: %.2f" %cost_time)
+# write into .csv file
+with open("../log/pulsar.csv", 'at+') as csvfile:
+    writer = csv.writer(csvfile)
+    if num == 0:
+        num = 1
+        writer.writerow(["map", "dims", "layer", "time", "train_acc", "test_acc", "k", "alpha", "beta", "acf"])
+        writer.writerow(
+            [num, X_train.shape[1], pilae.ae_layer, cost_time, pilae.train_acc, pilae.test_acc, pilae.k, pilae.alpha, pilae.acFunc])
+    else:
+        writer.writerow(
+            [num, X_train.shape[1], pilae.ae_layer, cost_time, pilae.train_acc, pilae.test_acc, pilae.k, pilae.alpha, pilae.acFunc])
