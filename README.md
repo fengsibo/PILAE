@@ -26,15 +26,15 @@ Pseduo-inverse Learning algorithm for Auto-encoder
 
 baidu pan url: https://pan.baidu.com/s/1c1HyfUK code: 2aig
 
-###How to use?
+### How to use?
 ```python
 import src.row_PILAE as rp
-pilae = rp.PILAE(k=k_list, pilk=pilk, alpha=alpha_list, pil_p = pil_p, AE_layer=1, PIL_layer=2, activeFunc='sig')
+pilae = rp.PILAE(k=[0.78, 0.43], pilk=0.07, alpha=[0.8, 0.7], pil_p = [2000, 1000], AE_layer=1, PIL_layer=2, activeFunc='sig')
 pilae.fit(X_train, y_train)
 
 ```
-where k is the list type param of PILAE, pilk is the list type param of PIL, pil_p is the list type param of the PIL, AE_layer is the int type param of PILAE denote layer of the PILAE, PIL_layer is the int type param of PIL denote layer of the PIL.
+where k is the list type param denoting the regularization param of the PILAE, pilk is the float type param denoting of regularization param of the PIL, alpha is the list type param denoting the \alpha, pil_p is the list type param of the PIL, AE_layer is the int type param of PILAE denote layer of the PILAE, PIL_layer is the int type param of PIL denote layer of the PIL. All the list type param corresponds to the each layer's param.
 
-The name of all the params correspond to the name of the vadiable in the paper.
+The name of all the params correspond to the name of the variable in the paper.
 
 
