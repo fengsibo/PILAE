@@ -1,6 +1,12 @@
 import pickle
 import numpy as np
 import matplotlib as plt
+import collections
+
+HParams = collections.namedtuple('HParams',
+                     'batch_size, num_classes, min_lrn_rate, lrn_rate, '
+                     'num_residual_units, use_bottleneck, weight_decay_rate, '
+                     'relu_leakiness, optimizer')
 
 def save_pickle(file, filesavepath):
     filepath = open(filesavepath, "wb")

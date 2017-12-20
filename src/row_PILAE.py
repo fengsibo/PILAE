@@ -12,13 +12,13 @@ import src.tools as tools
 
 
 class PILAE(object):
-    def __init__(self, k, pilk, alpha, pil_p, AE_layer=1, PIL_layer=1, activeFunc='sig'):
-        self.k = k
-        self.pilk = pilk
+    def __init__(self, ae_k, pil_k, alpha, pil_p, ae_layer=1, pil_layer=1, activeFunc='sig'):
+        self.k = ae_k
+        self.pilk = pil_k
         self.alpha = alpha
         self.pil_p = pil_p
-        self.ae_layer = AE_layer
-        self.pil_layer = PIL_layer
+        self.ae_layer = ae_layer
+        self.pil_layer = pil_layer
         self.train_acc = 0
         self.test_acc = 0
         self.acFunc = activeFunc
@@ -94,7 +94,7 @@ class PILAE(object):
         self.weight.append(pred_W)
 
 
-    def fit(self, X, y, one_hot=True):
+    def fit(self, X, y):
         train_X = X
         train_y = y
         t1 = time.time()

@@ -17,8 +17,8 @@ import src.tools as tools
 
 class PILAE(object):
 
-    def __init__(self, HiddernNeurons, batchsize, k, actFun='sig'):
-        self.HiddernNeurons = HiddernNeurons
+    def __init__(self, hidden_units, batchsize, k, actFun='sig'):
+        self.hidden_units = hidden_units
         self.batchsize = batchsize
         self.k = k
         self.actFun = actFun
@@ -52,7 +52,7 @@ class PILAE(object):
 
                 hidden_weight.append(V.dot(S))
 
-                if numbatch ==0:
+                if numbatch == 0:
                     H = delta_X.dot(self.InputWeight[i])
                     delta_H = self.activeFunction(H, self.actFun)
                     iS = np.linalg.inv(delta_H.T.dot(delta_H) + np.eye(delta_H.shape[1]) * self.k[i])
