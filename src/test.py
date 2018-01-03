@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 import sys
 import os
 workpath = os.path.abspath("..")
 sys.path.append(workpath)
-import src.row_PILAE as rp
+from src.pilae import PILAE
 import src.tools as tools
 import src.Hog as hg
 from sklearn import preprocessing
@@ -12,10 +13,13 @@ import multiprocessing
 import csv
 num = 0
 
-DATASET = 'mnist'
+DATASET = 'cifar10'
 (X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/"+DATASET+"/"+DATASET+".npz")
-X_train = X_train.reshape(-1, 784).astype('float32')/255
-X_test = X_test.reshape(-1, 784).astype('float32')/255
+X_train = X_train.reshape(-1, 1024).astype('float64')/255
+X_test = X_test.reshape(-1, 1024).astype('float64')/255
+
+X_train = X_train[0: 500, :]
+y_train = y_train[0: 500]
 
 # f = np.load("../dataset/PMPS/subbands.npz")
 # X_train = f['X']
@@ -34,24 +38,24 @@ X_test = X_test.reshape(-1, 784).astype('float32')/255
 # for i in range(1, 100):
 #     for j in range(1, 100):
 t1 = time.time()
-k_list = [0.78, 0.43]
-pilk = 0.07
-alpha_list = [0.8, 0.7]
-pil_p = [2000, 1000]
-pilae = rp.PILAE(k=k_list, pilk=pilk, alpha=alpha_list, pil_p = pil_p, AE_layer=1, PIL_layer=2, activeFunc='sig')
+ae_k_list = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+pil_k = 0.03
+alpha_list = [0.8, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9]
+pil_p = [800, 600]
+pilae = PILAE(ae_k_list=ae_k_list, pil_p=pil_p, pil_k=pil_k, alpha=alpha_list, ae_layers=10, pil_layers=0, acFunc='sig')
+
+
 pilae.fit(X_train, y_train)
-# pilae.predict(X_train, y_train, X_test, y_test)
-t2 = time.time()
-cost_time = t2 - t1
+cost_time = time.time() - t1
 print("Total cost time: %.2f" %cost_time)
 # write into .csv file
-with open("../log/pulsar.csv", 'at+') as csvfile:
+csv_file = "../log/mnist.csv"
+with open(csv_file, 'at+') as csvfile:
     writer = csv.writer(csvfile)
-    if num == 0:
-        num = 1
+    if os.path.getsize(csv_file):
         writer.writerow(["map", "dims", "layer", "time", "train_acc", "test_acc", "k", "alpha", "beta", "acf"])
         writer.writerow(
-            [num, X_train.shape[1], pilae.ae_layer, cost_time, pilae.train_acc, pilae.test_acc, pilae.k, pilae.alpha, pilae.acFunc])
+            [num, X_train.shape[1], pilae.ae_layers, cost_time, pilae.train_acc, pilae.test_acc, pilae.ae_k_list, pilae.alpha, pilae.acFunc])
     else:
         writer.writerow(
-            [num, X_train.shape[1], pilae.ae_layer, cost_time, pilae.train_acc, pilae.test_acc, pilae.k, pilae.alpha, pilae.acFunc])
+            [num, X_train.shape[1], pilae.ae_layers, cost_time, pilae.train_acc, pilae.test_acc, pilae.ae_k_list, pilae.alpha, pilae.acFunc])
