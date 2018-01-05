@@ -21,6 +21,6 @@ pilae.train_pilae(X_train, y_train)
 ```
 where `ae_k_list` is the list type param denoting the regularization param of the PILAE, `pil_k` is the float type param denoting of regularization param of the PIL, `alpha` is the list type param denoting the \[alpha \], `pil_p` is the list type param of the PIL, `ae_layers` is the int type param of PILAE denoting layers of the PILAE, `pil_layers` is the int type param of PIL denoting layers of the PIL classifier. All the list type params corresponds to the each layer's param.
 
-The name of all the params correspond to the name of the variable in the paper []SMC 2017 K. Wang et al](https://www.researchgate.net/profile/Ping_Guo3/publication/320077277_Autoencoder_Low_Rank_Approximation_and_Pseudoinverse_Learning_Algorithm/links/59ccc36d45851556e98792db/Autoencoder-Low-Rank-Approximation-and-Pseudoinverse-Learning-Algorithm.pdf).
+The name of all the params correspond to the name of the variable in the paper [SMC 2017 K. Wang et al](https://www.researchgate.net/profile/Ping_Guo3/publication/320077277_Autoencoder_Low_Rank_Approximation_and_Pseudoinverse_Learning_Algorithm/links/59ccc36d45851556e98792db/Autoencoder-Low-Rank-Approximation-and-Pseudoinverse-Learning-Algorithm.pdf).
 
 
