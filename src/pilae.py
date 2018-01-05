@@ -28,6 +28,12 @@ class PILAE(object):
         self.loss = []
         self.pilae_weight = []
         self.pil_weight = []
+        self.pil_train_acc = []
+        self.pil_test_acc = []
+        self.softmax_train_acc = []
+        self.softmax_test_acc = []
+        self.dim = []
+        self.rank = []
         self.layers = []
         for i in range(self.ae_layers):
             self.layers.append(i + 1)
@@ -39,7 +45,9 @@ class PILAE(object):
         t1 = time.time()
         U, s, transV = np.linalg.svd(input_X, full_matrices=0)
         dim_x = input_X.shape[1]
+        self.dim.append(dim_x)
         rank_x = np.linalg.matrix_rank(input_X)
+        self.rank.append(rank_x)
         transU = U.T
         if rank_x < dim_x:
             p = rank_x + self.alpha[layer] * (dim_x - rank_x)
@@ -55,9 +63,9 @@ class PILAE(object):
 
         H = self.activeFunction(input_H, self.acFunc)
 
-        invH = np.linalg.inv(H.T.dot(H) + np.eye(H.shape[1]) * self.k[layer])
+        invH = np.linalg.inv(H.T.dot(H) + np.eye(H.shape[1]) * self.ae_k_list[layer])
         W_d = invH.dot(H.T).dot(input_X)
-        print("train time cost {:.2f}s".format(time.time - t1))
+        print("train time cost {:.2f}s".format(time.time() - t1))
         return W_d.T
 
     def train_pilae(self, X, y):
@@ -77,46 +85,56 @@ class PILAE(object):
         for i in range(self.ae_layers):
             H = self.activeFunction(train_X.dot(self.pilae_weight[i]), self.acFunc)
             train_X = H
+            print("[info]====================the {} layer information=====================".format(i + 1))
             self.compute_loss(H)
             shuffle_X, shuffle_y = self.random_shuffle(H, y)
             (train_H, train_y), (valid_H, valid_y) = self.split_dataset(shuffle_X, shuffle_y)
-            self.predict_pil(train_H, train_y, valid_H, valid_y)
-            self.predict_softmax(train_H, train_y, valid_H, valid_y)
+            self.predict_pil(train_H, train_y, valid_H, valid_y, i)
+            self.predict_softmax(train_H, train_y, valid_H, valid_y, i)
+        self.model_analysis()
+
+    def model_analysis(self):
+        self.draw_one_chart(self.layers, self.loss)
+        self.draw_two_chart(self.layers, self.pil_train_acc, self.pil_test_acc)
+        self.draw_two_chart(self.layers, self.softmax_train_acc, self.softmax_test_acc)
+        self.draw_two_chart(self.layers, self.dim, self.rank, y_label='rank')
 
     def train_pil(self, train_X, train_y):
         X = train_X
         y = tools.to_categorical(train_y)
-        for i in range(self.pil_layer):
+        for i in range(self.pil_layers):
             pinvX = np.linalg.pinv(X)
             self.pil_weight.append(pinvX)
+            # pinvX = pinvX[:, 0: int(self.pil_p)]
             tempH = X.dot(pinvX)
             X = self.activeFunction(tempH, self.acFunc)
-        invH = np.linalg.inv(X.T.dot(X) + np.eye(X.shape[1]) * self.pilk)  # recompute W_d
+        invH = np.linalg.inv(X.T.dot(X) + np.eye(X.shape[1]) * self.pil_k)  # recompute W_d
         pred_W = invH.dot(X.T).dot(y)
         self.pil_weight.append(pred_W)
 
-    def predict_pil(self, train_X, train_y, test_X, test_y):
+    def predict_pil(self, train_X, train_y, test_X, test_y, layer):
         self.train_pil(train_X, train_y)
         train_y_true = tools.to_categorical(train_y)
         test_y_true = tools.to_categorical(test_y)
         for i in range(self.pil_layers):
             train_X = self.activeFunction(train_X.dot(self.pil_weight[i]), self.acFunc)
             test_X = self.activeFunction(test_X.dot(self.pil_weight[i]), self.acFunc)
+        train_y_predict = self.get_onehot(train_X.dot(self.pil_weight[-1]))
+        test_y_predict = self.get_onehot(test_X.dot(self.pil_weight[-1]))
         self.pil_weight = []
 
-        train_y_predict = self.get_onehot(train_X)
-        test_y_predict = self.get_onehot(test_X)
-
-        self.train_acc = accuracy_score(train_y_true, train_y_predict) * 100
-        self.test_acc = accuracy_score(test_y_true, test_y_predict) * 100
-        print("[INFO]+==================pil===================")
+        train_acc = accuracy_score(train_y_true, train_y_predict) * 100
+        test_acc = accuracy_score(test_y_true, test_y_predict) * 100
+        self.pil_train_acc.append(train_acc)
+        self.pil_test_acc.append(test_acc)
+        print("[INFO]+==================the {} layer pil===================".format(layer + 1))
         print("PIL classifier layer {}:".format(self.pil_layers))
-        print("PIL Train accuracy: {} | Test accuracy: {}".format(self.train_acc, self.test_acc))
-        self.test_recall_score = recall_score(train_y_true, train_y_predict, average='micro') * 100
-        self.test_f1_score = f1_score(train_y_true, train_y_predict, average='micro') * 100
-        self.test_classification_report = classification_report(train_y_true, train_y_predict)
-        print("PIL test recall: {} and f1_score: {}".format(self.test_recall_score, self.test_f1_score))
-        print(self.test_classification_report)
+        print("PIL Train accuracy: {} | Test accuracy: {}".format(train_acc, test_acc))
+        test_recall_score = recall_score(train_y_true, train_y_predict, average='micro') * 100
+        test_f1_score = f1_score(train_y_true, train_y_predict, average='micro') * 100
+        test_classification_report = classification_report(train_y_true, train_y_predict)
+        print("PIL test recall: {} and f1_score: {}".format(test_recall_score, test_f1_score))
+        # print(self.test_classification_report)
 
         cnf_matrix = confusion_matrix(np.argmax(test_y_predict, axis=1), np.argmax(test_y_true, axis=1))
 
@@ -126,27 +144,28 @@ class PILAE(object):
         model.fit(train_X, train_y)
         return model
 
-    def predict_softmax(self, train_X, train_y, test_X, test_y):
+    def predict_softmax(self, train_X, train_y, test_X, test_y, layer):
         model = self.train_softmax(train_X, train_y)
         train_y_predict = model.predict(train_X)
         test_y_predict = model.predict(test_X)
-        print("==================softmax classification=================")
-        self.train_acc = accuracy_score(train_y, train_y_predict) * 100
-        self.test_acc = accuracy_score(test_y, test_y_predict) * 100
-        print("Train accuracy:{}% | Test accuracy:{}%".format(self.train_acc, self.test_acc))
-        self.test_recall_score = recall_score(test_y, test_y_predict, average='micro') * 100
-        self.test_f1_score = f1_score(test_y, test_y_predict, average='micro') * 100
-        self.test_classification_report = classification_report(test_y, test_y_predict)
-        print("test recall{}%, f1_score:{}%".format(self.test_recall_score, self.test_f1_score))
-        print(self.test_classification_report)
-
+        print("==================softmax classification the {} layer=================".format(layer + 1))
+        train_acc = accuracy_score(train_y, train_y_predict) * 100
+        test_acc = accuracy_score(test_y, test_y_predict) * 100
+        self.softmax_train_acc.append(train_acc)
+        self.softmax_test_acc.append(test_acc)
+        print("Train accuracy:{}% | Test accuracy:{}%".format(train_acc, test_acc))
+        test_recall_score = recall_score(test_y, test_y_predict, average='micro') * 100
+        test_f1_score = f1_score(test_y, test_y_predict, average='micro') * 100
+        test_classification_report = classification_report(test_y, test_y_predict)
+        print("test recall:{}%, f1_score:{}%".format(test_recall_score, test_f1_score))
+        # print(self.test_classification_report)
 
     def compute_reconstruct_error(self, y_true, y_predict):
         pass
 
     def compute_loss(self, H):
         pinvH = np.linalg.pinv(H)
-        sq = H.dot(pinvH) - np.eye(U.shape[0])
+        sq = H.dot(pinvH) - np.eye(H.shape[0])
         loss = np.linalg.norm(sq)
         self.loss.append(loss)
         print("loss:{:.5f}".format(loss))
@@ -175,10 +194,6 @@ class PILAE(object):
                               normalize=False,
                               title='Confusion matrix',
                               cmap=plt.cm.Blues):
-        """
-        This function prints and plots the confusion matrix.
-        Normalization can be applied by setting `normalize=True`.
-        """
         if normalize:
             cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
             print("Normalized confusion matrix")
@@ -241,10 +256,19 @@ class PILAE(object):
         model.fit(train_X, train_y)
         return model
 
-    def draw_loss(self, x, y):
+    def draw_one_chart(self, x, y, x_label='model layers', y_label='model loss'):
         plt.figure()
         plt.plot(x, y, marker='^')
-        plt.xlabel('model layers')
-        plt.ylabel('model loss')
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        plt.show()
+        plt.close()
+
+    def draw_two_chart(self, x, y1, y2, x_label='model layers', y_label='accuracy(%)'):
+        plt.figure()
+        plt.plot(x, y1, marker='^')
+        plt.plot(x, y2, marker='o')
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
         plt.show()
         plt.close()
