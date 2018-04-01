@@ -35,11 +35,11 @@ hog_descriptor = [
     {'orientations': 96, 'block': (8, 8), 'cell': (2, 2)},
 ]
 
-hog_arr = [0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18, 20, 22, 24]
+hog_arr = [0, 2, 4]
 
 def extract_hog_featuer(X, type, num):
     input_X = X
-    from skimage.feature import hog
+
     hog_f = hog(input_X[0], hog_descriptor[num]["orientations"], hog_descriptor[num]["block"], hog_descriptor[num]["cell"])
     hog_f = hog_f.reshape((hog_f.shape[0], 1))
     feature = np.empty(hog_f.shape)
@@ -91,32 +91,61 @@ def select_hog(path, list):
             X_test = np.concatenate((X_test, m_test), axis=1)
     return X_train, X_test
 
-# if __name__ == "__main__":
-#     (X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/mnist/mnist.npz")
-#     hog_f = hog(X_train[0], 96, (8, 8), (2, 2))
-#     print(hog_f)
-#     print(hog_f.__len__())
-# #
+# # if __name__ == "__main__":
+# #     (X_train, y_train), (X_test, y_test) = tools.load_npz("../dataset/mnist/mnist.npz")
+# #     hog_f = hog(X_train[0], 96, (8, 8), (2, 2))
+# #     print(hog_f)
+# #     print(hog_f.__len__())
+# # #
+# #     len = hog_descriptor.__len__()
+# #     i = 16
+# #     while i < len:
+# #         extract_hog_featuer(X_train, "mnist/mnist_hog_feature_train", i)
+# #         extract_hog_featuer(X_test, "mnist/mnist_hog_feature_test", i)
+# #         i += 1
+#
+#     # X_train, y_train = tools.load_fashionMNIST()
+#     # X_test, y_test = tools.load_fashionMNIST(kind='t10k')
+#     # X_train = X_train.reshape((60000, 28, 28))
+#     # X_test = X_test.reshape((10000, 28, 28))
+#     # print(X_train.shape, X_test.shape)
+#     #
+#     # #
+#     # len = hog_descriptor.__len__()
+#     # i = 0
+#     # while i < len:
+#     #     extract_hog_featuer(X_train, "fashion_mnist/fashion_mnist_hog_feature_train", i)
+#     #     extract_hog_featuer(X_test, "fashion_mnist/fashion_mnist_hog_feature_test", i)
+#     #     i += 1
+# import cv2
+# path = '../dataset/pmps/pmps/1good/3_in'
+# image_list = tools.getImageList(path)
+# good = np.empty((2000, 3924))
+# good_label = np.empty((2000, 1))
+# i = 0
+# print(image_list.__len__())
+# for image in image_list:
+#     im = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
 #     len = hog_descriptor.__len__()
-#     i = 16
-#     while i < len:
-#         extract_hog_featuer(X_train, "mnist/mnist_hog_feature_train", i)
-#         extract_hog_featuer(X_test, "mnist/mnist_hog_feature_test", i)
-#         i += 1
+#
+#     h0 = hog(im, hog_descriptor[0]["orientations"], hog_descriptor[0]["block"], hog_descriptor[0]["cell"])
+#     h0.reshape((h0.shape[0], 1))
+#     h1 = hog(im, hog_descriptor[1]["orientations"], hog_descriptor[1]["block"], hog_descriptor[1]["cell"])
+#     h1.reshape((h1.shape[0], 1))
+#     h2 = hog(im, hog_descriptor[2]["orientations"], hog_descriptor[2]["block"], hog_descriptor[2]["cell"])
+#     h2.reshape((h2.shape[0], 1))
+#     tmp = np.append(h0, h1)
+#     tmp = np.append(tmp, h2)
+#     good[i] = tmp
+#     good_label[i] = 1
+#     i += 1
+#     print(i)
+#
+# np.savez("../dataset/pmps/good_3.npz", X=good, y=good_label)
 
-    # X_train, y_train = tools.load_fashionMNIST()
-    # X_test, y_test = tools.load_fashionMNIST(kind='t10k')
-    # X_train = X_train.reshape((60000, 28, 28))
-    # X_test = X_test.reshape((10000, 28, 28))
-    # print(X_train.shape, X_test.shape)
-    #
-    # #
-    # len = hog_descriptor.__len__()
-    # i = 0
-    # while i < len:
-    #     extract_hog_featuer(X_train, "fashion_mnist/fashion_mnist_hog_feature_train", i)
-    #     extract_hog_featuer(X_test, "fashion_mnist/fashion_mnist_hog_feature_test", i)
-    #     i += 1
+if __name__ == "__main__":
+    pass
+
 
 
 

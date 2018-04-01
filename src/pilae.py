@@ -16,15 +16,20 @@ import src.tools as tools
 
 
 class PILAE(object):
-    def __init__(self, ae_k_list, pilae_p, pil_p, pil_k=0.03, alpha=0.9, num_ae_layers=1, num_pil_layers=1, acFunc='sig'):
+    def __init__(self, pilae_p, pil_p, ae_k_list, pil_k, alpha=0.9, acFunc='sig'):
+        self.pilae_p = pilae_p
+        self.pil_p = pil_p
         self.ae_k_list = ae_k_list
         self.pil_k = pil_k
         self.alpha = alpha
-        self.pilae_p = pilae_p
-        self.pil_p = pil_p
-        self.num_ae_layers = num_ae_layers
-        self.pil_layers = num_pil_layers
         self.acFunc = acFunc
+
+        self.num_ae_layers = len(pilae_p)
+        self.pil_layers = len(pil_p)
+
+        if len(ae_k_list) < self.num_ae_layers:
+            print("ae_k_list的长度和层数不符，检查ae_k_list参数")
+
         self.error = []
         self.loss = []
         self.pilae_weight = []
@@ -36,12 +41,7 @@ class PILAE(object):
         self.dim = []
         self.rank = []
         self.layers = []
-        for i in range(self.num_ae_layers):
-            self.layers.append(i + 1)
-        if self.num_ae_layers > len(self.ae_k_list):
-            print("the pilae layer error!")
-            sys.exit()
-        # if self.pil_layers > len(self.pil_p):
+
 
     # 自编码结构
     # @param
@@ -66,7 +66,7 @@ class PILAE(object):
 
         ## ② 自定义隐层单元个数方法
         p = self.pilae_p[layer_th]  # 从self.pilae_p列表中读取第layer_th层的隐层单元个数
-        print("[INFO] the {} layer message:".format(layer_th))
+        print("\033[0;36;40m[BASE INFO]\033[0m the {} layer message:".format(layer_th))
         print("the dim_x:{}, rank_x:{}, cut_p:{}".format(dim_x, rank_x, int(p)))
 
         cutU = transU[:, 0:int(p)]  # 矩阵截断
@@ -86,11 +86,11 @@ class PILAE(object):
     def train_pilae(self, X, y):
         t1 = time.time()
         train_X = X
-        train_y = y
 
         # 根据self.ae_layers设置的层数 使用for循环进行逐层训练
         for i in range(self.num_ae_layers):
             w = self.autoEncoder(train_X, i) # 训练该层的自编码器编码权重
+            self.layers.append(i)
             self.pilae_weight.append(w) # 保存权重
             H = self.activeFunction(train_X.dot(w), self.acFunc) # 计算自编码器的编码(特征) 也就是下一个自编码器的输入
             train_X = H
@@ -108,16 +108,17 @@ class PILAE(object):
         # 说明: 之前是使用训练集训练权重，然后使用测试集与训练权重计算得到特征
         # 但是2017年末 Guo老师说要训练测试数据放到一起在自编码器中 输出特征之后再划分训练集 测试集 目的是使数据同分布
         for i in range(self.num_ae_layers):
+            print("\033[0;31;40m[CLASSIFIER INFO]\033[0m the {} layer result".format(i))
             H = self.activeFunction(train_X.dot(self.pilae_weight[i]), self.acFunc) #根据输入 加载保存的权重 逐层计算自编码器提取的特征
             train_X = H
-            print("[INFO]====================the {} layer information=====================".format(i + 1))
-            self.compute_loss(H)  # 计算每层的loss
+            loss = self.compute_loss(H)  # 计算每层的loss
+            print("loss: {}".format(loss))
             shuffle_X, shuffle_y = self.__random_shuffle(H, y) # 随机打乱数据集 相当于随机抽样
             (train_H, train_y), (valid_H, valid_y) = self.__split_dataset(shuffle_X, shuffle_y) # 划分数据集为训练集合测试集
             self.predict_pil(train_H, train_y, valid_H, valid_y, i) # 使用pil分类器预测
-            # self.predict_softmax(train_H, train_y, valid_H, valid_y, i) # 使用softmax分类器
+            self.predict_softmax(train_H, train_y, valid_H, valid_y, i) # 使用softmax分类器
         # self.model_analysis()
-        self.result_figure()
+        self.result_figure() # 会把结果画在一张图上面
 
     # 用来画图 对模型进行分析 这个可以改写里面的函数 保存图片用于论文用图
     def model_analysis(self):
@@ -166,7 +167,6 @@ class PILAE(object):
         # 将结果保存到self.pil_train_acc中
         self.pil_train_acc.append(train_acc)
         self.pil_test_acc.append(test_acc)
-        print("[INFO]======================the {} layer pil===================".format(layer_th))
         print("PIL classifier layer {}:".format(self.pil_layers))
         print("PIL Train accuracy: {}% | Test accuracy: {}%".format(train_acc, test_acc))
         # test_recall_score = recall_score(train_y_true, train_y_predict, average='micro') * 100
@@ -176,7 +176,7 @@ class PILAE(object):
         # print(self.test_classification_report)
         cnf_matrix = confusion_matrix(np.argmax(test_y_predict, axis=1), np.argmax(test_y_true, axis=1))
         # 打印混淆矩阵
-        print(cnf_matrix)
+        # print('confusion_matrix', cnf_matrix)
 
     # 训练逻辑回归
     def train_softmax(self, train_X, train_y):
@@ -190,12 +190,11 @@ class PILAE(object):
         model = self.train_softmax(train_X, train_y)
         train_y_predict = model.predict(train_X)
         test_y_predict = model.predict(test_X)
-        print("==================softmax classification the {} layer=================".format(layer_th))
         train_acc = accuracy_score(train_y, train_y_predict) * 100
         test_acc = accuracy_score(test_y, test_y_predict) * 100
         self.softmax_train_acc.append(train_acc)
         self.softmax_test_acc.append(test_acc)
-        print("Train accuracy:{}% | Test accuracy:{}%".format(train_acc, test_acc))
+        print("Softmax Train accuracy:{}% | Test accuracy:{}%".format(train_acc, test_acc))
         # test_recall_score = recall_score(test_y, test_y_predict, average='micro') * 100
         # test_f1_score = f1_score(test_y, test_y_predict, average='micro') * 100
         # test_classification_report = classification_report(test_y, test_y_predict)
@@ -210,7 +209,7 @@ class PILAE(object):
         sq = H.dot(pinvH) - np.eye(H.shape[0])
         loss = np.linalg.norm(sq)
         self.loss.append(loss)
-        print("loss:{:.5f}".format(loss))
+        return loss
 
     def activeFunction(self, tempH, func='sig'):
         switch = {
@@ -311,18 +310,21 @@ class PILAE(object):
         plt.xlabel("autoencoder layers")
         plt.ylabel("pil classifier accuracy")
 
+        print(self.layers, self.pil_train_acc)
+        print(self.layers, self.softmax_train_acc)
         plt.subplot(223)
-        plt.subplot(self.layers, self.softmax_train_acc, marker='^', label='train')
-        plt.subplot(self.layers, self.softmax_test_acc, marker='o', label='test')
+        plt.plot(self.layers, self.softmax_train_acc, marker='^', label='train')
+        plt.plot(self.layers, self.softmax_test_acc, marker='o', label='test')
         plt.xlabel("autoencoder layers")
         plt.ylabel("softmax classifier accuracy")
 
         plt.subplot(224)
-        plt.subplot(self.layers, self.dim, marker='^', label='dimension')
-        plt.subplot(self.layers, self.rank, marker='o', label='rank')
+        plt.plot(self.layers, self.dim, marker='^', label='dimension')
+        plt.plot(self.layers, self.rank, marker='o', label='rank')
         plt.xlabel("autoencoder layers")
         plt.ylabel("dim & rank")
 
+        plt.subplots_adjust(wspace=0.5, hspace=0.6)
         plt.show()
         plt.close()
 
