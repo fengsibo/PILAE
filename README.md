@@ -22,7 +22,7 @@ X_test = X_test.reshape(-1, DIMESION_OF_DATASET).astype('float64') / 255.
 # 创建对象时注意 num_*_layers和len(list)和len(pil*_p)对应(层数和list长度对应)
 pilae = PILAE(pilae_p=[500, 480, 460],
               pil_p=[300],
-              ae_k_list=[0.7, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+              ae_k_list=[0.7, 0.1, 0.1],
               pil_k=0.0,
               acFunc='sig')
 
