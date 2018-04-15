@@ -53,4 +53,7 @@ acFunc:激活函数  'sig', 'sin', 'srelu', 'tanh', 'swish', 'relu' 可选
 
 具体参数描述请参考论文 [SMC 2017 K. Wang et al](https://www.researchgate.net/profile/Ping_Guo3/publication/320077277_Autoencoder_Low_Rank_Approximation_and_Pseudoinverse_Learning_Algorithm/links/59ccc36d45851556e98792db/Autoencoder-Low-Rank-Approximation-and-Pseudoinverse-Learning-Algorithm.pdf).
 
-[注] 如果有幸你用了我的代码，请将该github链接添加到论文的引用
+[注] ：
+
+- 使用代码请引用github链接https://github.com/sibofeng/PILAE
+- 欢迎批评指正，欢迎提交代码
