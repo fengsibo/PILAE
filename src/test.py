@@ -31,4 +31,4 @@ pilae = PILAE(pilae_p=[500, 400],
               pil_k=0.0,
               acFunc='sig')
 
-pilae.train_pilae(X_train, y_test)
+pilae.train_pilae(X_train, y_train)
