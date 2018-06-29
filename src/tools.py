@@ -1,4 +1,4 @@
-import pickle
+import os, pickle
 import numpy as np
 import matplotlib as plt
 import collections
@@ -28,6 +28,20 @@ def load_npz(path):
     y_test = f['y_test']
     f.close()
     return (x_train, y_train), (x_test, y_test)
+
+def create_dir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+def split_dataset(X, y, per=0.7):
+    num = len(y)
+    index = [i for i in range(len(y))]
+    np.random.shuffle(index)
+    index = np.array(index)
+    train_num = int(num*per)
+    X = np.array(X)[index]
+    y = np.array(y)[index]
+    return X[:train_num, :], y[:train_num], X[train_num:, :], y[train_num:]
 
 def load_fashionMNIST(path="../dataset/fashion_mnist", kind='train'):
     import os
@@ -72,6 +86,11 @@ def load_cifar10(cifar10_dir):
             X_train = np.concatenate((X_train, X))
             y_train = np.concatenate((y_train, y))
     return (X_train, y_train), (X_test, y_test)
+
+def write_log(file, string):
+    with open(file, 'a+') as f:
+        f.writelines(string)
+        f.writelines('\n')
 
 
 def to_categorical(y, num_classes=None):
