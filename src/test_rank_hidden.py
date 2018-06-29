@@ -34,11 +34,11 @@ list_test_acc = []
 list_num_hidden_units = []
 for p in range(100, 40000, 200):
     pilae = PILAE(pilae_p=[p],
-                  pil_p=[],
+                  pil_p=[p],
                   ae_k_list=[0.7],
                   pil_k=0.0,
                   acFunc='sig')
-    pilae.train_pilae(X_train, y_train)
+    # pilae.train_pilae(X_train, y_train)
     pilae.classifier(X_train, y_train, X_test, y_test)
     list_train_acc.append(pilae.pil_train_acc)
     list_test_acc.append(pilae.pil_test_acc)
@@ -48,7 +48,8 @@ for p in range(100, 40000, 200):
 # list_train_acc = [0.3, 0.5, 0.7]
 # list_test_acc = [0.2, 0.3, 0.5]
 # list_num_hidden_units = [10, 20, 30]
-fig_save_path = 'save_fig'
+fig_save_path = '../save_fig'
+data_save_path = '../save_data'
 tools.create_dir(fig_save_path)
 test_acc_max_value = max(list_test_acc)[0]
 test_acc_max_index = list_num_hidden_units[list_test_acc.index(test_acc_max_value)]
@@ -63,9 +64,13 @@ plt.plot(test_acc_max_index, test_acc_max_value, marker='^', color='red')
 plt.text(test_acc_max_index - 5, test_acc_max_value, "{}:{}, \n{},{:.4f}".format("rank", rank, "hidden_unit", test_acc_max_value))
 plt.legend()
 plt.savefig(os.path.join(fig_save_path, "{}_{}_{}.png".format(DATASET, rank, test_acc_max_index)))
-plt.show()
+# plt.show()
 plt.close()
 
 tools.write_log("log.txt", "{} {} {}".format(DATASET, rank, test_acc_max_index))
-
 print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
+
+result_data = {'units': list_num_hidden_units, 'train_acc': list_train_acc, 'test_acc': list_test_acc}
+tools.save_pickle(result_data, "{}_result.pickle".format(DATASET))
+
+
